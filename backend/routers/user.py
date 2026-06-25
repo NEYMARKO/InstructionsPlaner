@@ -9,9 +9,9 @@ from ..db import get_db
 router = APIRouter(prefix="/users")
 service = UserService()
 
-@router.get("/{id}")
-async def get_user(id: int):
-    return {"id": id}
+@router.get("/")
+async def get_users(db: Annotated[Session, Depends(get_db)]) -> list[UserDTO]:
+    return service.get_users(db)
 
 @router.post("/create")
 async def create_user(user: UserCreationDTO, db: Annotated[Session, Depends(get_db)]) -> UserDTO:

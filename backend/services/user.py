@@ -19,3 +19,6 @@ class UserService():
             raise HTTPException(status_code=400, detail="Email not verified")
         repository.save_user(user, db)
         return user
+    
+    def get_users(self, db: Session) -> list[UserDTO]:
+        return repository.get_users(db)
