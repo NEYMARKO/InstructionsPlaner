@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.orm import Session
+from uuid import UUID
 
-from ..dto.user import UserDTO, UserCreationDTO
+from ..dto.user import UserResponse, UserRequest
 from ..services.user import UserService
 from ..db import get_db
 
@@ -32,9 +33,18 @@ def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
     return UserService(db)
 
 @router.get("/")
-async def get_users(service: Annotated[UserService, Depends(get_user_service)]) -> list[UserDTO]:
+async def get_users(service: Annotated[UserService, Depends(get_user_service)]) -> list[UserResponse]:
     return service.get_users()
 
 @router.post("/create")
-async def create_user(user: UserCreationDTO, service: Annotated[UserService, Depends(get_user_service)]) -> UserDTO:
+async def create_user(user: UserRequest, service: Annotated[UserService, Depends(get_user_service)]) -> UserResponse:
     return service.create_user(user)
+
+# @router.delete("/delete/{id}")
+# async def delete_user(id: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> None:
+#     return service.delete_user(id)
+
+@router.get("/confirm/{uuid}")
+async def confirm_email(uuid: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> UUID:
+    # return service.validate_email(uuid)
+    return uuid

@@ -6,12 +6,19 @@ import uuid
 
 Base = declarative_base()
 
+class EmailConfirmation(Base):
+    __tablename__ = "email_confirmation"
+    email = Column(String, primary_key=True)
+    sent_uuid = Column(UUID(as_uuid=True))
+    activated = Column(Boolean)
+    requested_at = Column(TIMESTAMP)
+
 class User(Base):
     __tablename__ = "user"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     is_student = Column(Boolean, nullable=False)
 
 class Group(Base):
