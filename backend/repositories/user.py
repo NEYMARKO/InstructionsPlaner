@@ -1,6 +1,7 @@
-from ..dto.user import UserResponse, UserRequest
-from ..models import User
+from ..dto.user import UserResponse, UserRequest, EmailConfirmationBase
+from ..models import User, EmailConfirmation
 
+from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -31,4 +32,32 @@ class UserRepository():
             )
             for row in rows
         ]
-    
+
+    def add_email_verification(self, e_obj: EmailConfirmationBase) -> None:
+        email_conf_model = EmailConfirmation(email=e_obj.email, sent_uuid=e_obj.sent_uuid, activated=e_obj.activated, requested_at=e_obj.requested_at)
+        self.db.add(email_conf_model)
+        self.db.commit()
+        return
+
+    def delete_mail_verif(self, email: str) -> None:
+        self.db.query(EmailConfirmation).filter(EmailConfirmation.email == email).delete()
+        self.db.commit()
+        return
+
+    def get_email_confirmation(self, email: str) -> EmailConfirmationBase:
+        result = self.db.query(EmailConfirmation).get(email)
+        return EmailConfirmationBase.model_validate(result)
+
+    def update_mail_verif(self, uuid: UUID) -> None:
+        # query = """
+        # UPDATE email_confirmation
+        # SET activated = TRUE
+        # WHERE sent_uuid = :uuid
+        # """
+        # self.db.execute(text(query), {"uuid": uuid})
+        # self.db.commit()
+        self.db.query(EmailConfirmation).\
+            filter(EmailConfirmation.sent_uuid == uuid).\
+                update({"activated": True})
+        self.db.commit()
+        return

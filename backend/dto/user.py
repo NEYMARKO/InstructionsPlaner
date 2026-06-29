@@ -1,6 +1,6 @@
-from pydantic import BaseModel
-# from sqlalchemy.dialects.postgresql import UUID
 from uuid import UUID
+from datetime import datetime
+from pydantic import BaseModel
 
 class UserBase(BaseModel):
     username: str
@@ -17,6 +17,15 @@ class UserResponse(UserBase):
 class UserRequest(UserBase):
     password: str
 
+class EmailConfirmationBase(BaseModel):
+    email: str
+    sent_uuid: UUID
+    activated: bool
+    requested_at: datetime
+    model_config = {
+        "from_attributes": True
+    }
+    
 # class UserResponse(BaseModel):
 #     id: UUID
 #     username: str

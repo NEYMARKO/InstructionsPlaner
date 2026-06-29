@@ -1,6 +1,6 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, DateTime, func
 
 import uuid
 
@@ -11,7 +11,7 @@ class EmailConfirmation(Base):
     email = Column(String, primary_key=True)
     sent_uuid = Column(UUID(as_uuid=True))
     activated = Column(Boolean)
-    requested_at = Column(TIMESTAMP)
+    requested_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class User(Base):
     __tablename__ = "user"

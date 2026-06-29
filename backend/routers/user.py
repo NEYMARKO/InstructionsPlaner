@@ -38,13 +38,12 @@ async def get_users(service: Annotated[UserService, Depends(get_user_service)]) 
 
 @router.post("/create")
 async def create_user(user: UserRequest, service: Annotated[UserService, Depends(get_user_service)]) -> UserResponse:
-    return service.create_user(user)
+    return await service.create_user(user)
 
 # @router.delete("/delete/{id}")
 # async def delete_user(id: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> None:
 #     return service.delete_user(id)
 
 @router.get("/confirm/{uuid}")
-async def confirm_email(uuid: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> UUID:
-    # return service.validate_email(uuid)
-    return uuid
+async def confirm_email(uuid: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> str:
+    return service.confirm_mail(uuid)
