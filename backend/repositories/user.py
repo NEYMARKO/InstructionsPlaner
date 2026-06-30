@@ -3,7 +3,9 @@ from ..models import User, EmailConfirmation
 
 from uuid import UUID
 from sqlalchemy import text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import MultipleResultsFound
 
 class UserRepository():
 
@@ -54,3 +56,19 @@ class UserRepository():
         self.db.query(EmailConfirmation).filter(EmailConfirmation.email == email).delete()
         self.db.commit()
         return
+    
+    def get_user_by_username(self, username: str) -> User | None:
+        query = select(User).where(User.username==username)
+        try:
+            return (
+                self.db.execute(query).scalar_one_or_none()
+            )
+        except MultipleResultsFound:
+            raise ValueError(f"Mutliple users found with username: '{username}'")
+
+    def get_user_password(self, username: str) -> str | None:
+        """
+        Retrives password for provided username.
+        """
+        user = self.get_user_by_username(username)
+        return user.password if user else None

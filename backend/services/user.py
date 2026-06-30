@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from ..dto.user import EmailConfirmationBase
 from email.mime.multipart import MIMEMultipart
 from ..repositories.user import UserRepository
-from ..dto.user import UserResponse, UserRequest
+from ..dto.user import UserResponse, UserRequest, UserCredentials, LoginResponse
 
 load_dotenv(str(Path(__file__).parent / ".env"))
 
@@ -94,15 +94,34 @@ class UserService():
             await asyncio.sleep(0.5)
         return confirmed
     
+    def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
+        self.repository.update_mail_verification_info(validation_uuid)
+        return "Your confirmation has been registered"
+
     async def create_user(self, user: UserRequest) -> UserResponse:
         if not await self.validate_email(user.email):
             raise HTTPException(status_code=408, detail="Wait time exceeded: mail not verified in time")
         self.repository.delete_mail_verification_info(user.email)
         return self.repository.save_user(user)
     
-    def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
-        self.repository.update_mail_verification_info(validation_uuid)
-        return "Your confirmation has been registered"
-    
     def get_users(self) -> list[UserResponse]:
         return self.repository.get_users()
+    
+    def login(self, user_credentials: UserCredentials) -> LoginResponse:
+        """
+        Checks whether user with these particular credentials exists. In case user has logged with
+        valid credentials, session is created and session id is passed through cookies in response.    
+        """
+        password = ""
+
+        try:
+            password = self.repository.get_user_password(user_credentials.username)
+        except ValueError:
+            raise HTTPException(status_code=401, detail="Invalid login credentials")
+        
+        if user_credentials.password != password:
+            raise HTTPException(status_code=401, detail="Invalid login credentials")
+        
+        session_id = str(uuid.uuid4())
+        # Save session to db to compare it during every access to restriced endpoint
+        return LoginResponse(message="Successfully logged in", user_uuid_str="", session_uuid_str=session_id)

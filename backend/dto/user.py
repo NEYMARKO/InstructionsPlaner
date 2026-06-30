@@ -17,6 +17,10 @@ class UserResponse(UserBase):
 class UserRequest(UserBase):
     password: str
 
+class UserCredentials(BaseModel):
+    username: str
+    password: str
+
 class EmailConfirmationBase(BaseModel):
     email: str
     sent_uuid: UUID
@@ -26,6 +30,14 @@ class EmailConfirmationBase(BaseModel):
         "from_attributes": True
     }
     
+class LoginResponse(BaseModel):
+    message: str
+    user_uuid_str: str
+    session_uuid_str: str
+
+class LogoutResponse(BaseModel):
+    message: str
+
 # class UserResponse(BaseModel):
 #     id: UUID
 #     username: str
