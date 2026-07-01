@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from ..dto.user import EmailConfirmationBase
 from email.mime.multipart import MIMEMultipart
 from ..repositories.user import UserRepository
-from ..dto.user import UserResponse, UserRequest, UserCredentials, LoginResponse
+from ..dto.user import UserResponse, UserRequest
 
 load_dotenv(str(Path(__file__).parent / ".env"))
 
@@ -107,21 +107,3 @@ class UserService():
     def get_users(self) -> list[UserResponse]:
         return self.repository.get_users()
     
-    def login(self, user_credentials: UserCredentials) -> LoginResponse:
-        """
-        Checks whether user with these particular credentials exists. In case user has logged with
-        valid credentials, session is created and session id is passed through cookies in response.    
-        """
-        password = ""
-
-        try:
-            password = self.repository.get_user_password(user_credentials.username)
-        except ValueError:
-            raise HTTPException(status_code=401, detail="Invalid login credentials")
-        
-        if user_credentials.password != password:
-            raise HTTPException(status_code=401, detail="Invalid login credentials")
-        
-        session_id = str(uuid.uuid4())
-        # Save session to db to compare it during every access to restriced endpoint
-        return LoginResponse(message="Successfully logged in", user_uuid_str="", session_uuid_str=session_id)

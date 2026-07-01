@@ -65,10 +65,3 @@ class UserRepository():
             )
         except MultipleResultsFound:
             raise ValueError(f"Mutliple users found with username: '{username}'")
-
-    def get_user_password(self, username: str) -> str | None:
-        """
-        Retrives password for provided username.
-        """
-        user = self.get_user_by_username(username)
-        return user.password if user else None

@@ -1,0 +1,30 @@
+from datetime import datetime
+from pydantic import BaseModel
+
+class LoginResponse(BaseModel):
+    message: str
+    token: str
+    user_uuid_str: str
+
+class LogoutResponse(BaseModel):
+    message: str
+
+class UserCredentials(BaseModel):
+    username: str
+    password: str
+
+# class SessionResponse(BaseModel):
+#     token: str
+#     user_uuid: str
+
+# class SessionRequest(BaseModel):
+#     user_uuid: str
+#     token: str
+#     expires_at: datetime
+#     valid_until: datetime
+
+class Session(BaseModel):
+    user_uuid: str
+    token: str
+    refreshes_at: datetime
+    valid_until: datetime | None = None

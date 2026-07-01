@@ -40,3 +40,10 @@ class Remark(Base):
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     sender_id: Mapped[UUID] = mapped_column(UUID, nullable=False)
     text: Mapped[str] = mapped_column(String, nullable=False)
+
+class Session(Base):
+    __tablename__ = "session"
+    user_uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    refreshes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    valid_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
