@@ -43,7 +43,7 @@ class Remark(Base):
 
 class SessionModel(Base): # otherwise it is ambiguous when working with sqlalchemy.org.Session
     __tablename__ = "session"
-    user_uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_uuid: Mapped[str] = mapped_column(String, primary_key=True, default=str(uuid.uuid4))
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     refreshes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    valid_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -19,6 +19,8 @@ from ..dto.user import UserResponse, UserRequest
 
 load_dotenv(str(Path(__file__).parent / ".env"))
 
+CHECK_INTERVAL_SEC = 2
+
 def send_confirmation_mail(email, confirmation_uuid: uuid.UUID) -> None:
     
     mail_sender = os.getenv("MAIL_SENDER")
@@ -91,7 +93,7 @@ class UserService():
         
         start = datetime.now()
         while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(CHECK_INTERVAL_SEC)
         return confirmed
     
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:

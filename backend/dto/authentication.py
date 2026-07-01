@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class LoginResponse(BaseModel):
     message: str
@@ -28,3 +28,4 @@ class SessionDTO(BaseModel): # otherwise it is ambiguous when working with sqlal
     token: str
     refreshes_at: datetime
     valid_until: datetime | None = None
+    model_config = ConfigDict(from_attributes=True)

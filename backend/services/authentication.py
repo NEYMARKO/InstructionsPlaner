@@ -2,8 +2,8 @@ import uuid
 import psycopg2
 from hashlib import sha256
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
 from fastapi import HTTPException, Request
+from datetime import datetime, timedelta, timezone
 
 
 from ..shared import SESSION_USER_UUID_STR
@@ -48,12 +48,19 @@ class AuthService():
 
         session = self.repository.get_session(user_uuid)
         if session: # if session shouldn't be refreshed yet, return result
-            if session.refreshes_at < datetime.now():
-                print("[SESSION]: Token already exists, refreshing it")
-                return (user_uuid, session.token)
-            elif session.valid_until and session.valid_until > datetime.now():
+            if session.valid_until and session.valid_until < datetime.now(timezone.utc): # valid until is of type: datetime | None => check whether it is None before comparing it 
+                # print(f"VALID UNTIL: {session.valid_until}")
+                # print(f"NOW: {datetime.now(timezone.utc)}")
+                print("[SESSION::TOKEN_EXPIRED]: valid_until timestamp exceeded => deleting session")
                 self.repository.delete_session(user_uuid)
                 return ("", "")
+            elif session.refreshes_at < datetime.now(timezone.utc):
+                print("[SESSION::TOKEN_REFRESH]: Token's refresh threshold exceeded => refreshing it")
+                self.refresh_token(user_uuid=user_uuid)
+                return (user_uuid, session.token)
+            else:
+                print("[SESSION::TOKEN_UNCHANGED]")
+                return (session.user_uuid, session.token)
         try:
             self.repository.create_session(
                 SessionDTO(
@@ -62,14 +69,18 @@ class AuthService():
                 valid_until=datetime.now() + timedelta(days=TOKEN_VALIDITY_LIFETIME_DAYS)
                 )
             )
+            print("[SESSION::CREATION]: created session")
         
         except psycopg2.errors.UniqueViolation: # tried to adding session for same user
             return ("", "")
         
         return (user_uuid, token)
     
-    def refresh_token(self, request: Request) -> None:
-        user_uuid = request.cookies.get(SESSION_USER_UUID_STR, "")
+    def refresh_token(self, user_uuid: str = "", request: Request | None = None) -> None:
+        if not user_uuid and not request:
+            raise HTTPException(status_code=500, detail="[SESSION::REFRESH_TOKEN]: Neither user_uuid nor Request have been provided")
+
+        user_uuid = request.cookies.get(SESSION_USER_UUID_STR, "") if request else user_uuid
 
         self.repository.refresh_token(SessionDTO(
             user_uuid=user_uuid,

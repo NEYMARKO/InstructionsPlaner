@@ -52,5 +52,6 @@ class AuthRepository():
     
     def get_session(self, user_uuid: str) -> SessionDTO | None:
         query = select(SessionModel).where(SessionModel.user_uuid==user_uuid)
-        result = self.db.execute(query).one_or_none()
+        result = self.db.scalars(query).one_or_none()
+        print(f"{result=}")
         return SessionDTO.model_validate(result) if result is not None else result
