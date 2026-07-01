@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, select, delete
 
 from .user import UserRepository
-from ..models import Session as SessionModel # it will get mixed up with sqlalchemy.orm.Session otherwise
-from ..dto.authentication import Session as SessionDTO
+from ..models import SessionModel 
+from ..dto.authentication import SessionDTO 
 
 class AuthRepository():
     def __init__(self, db: Session) -> None:
@@ -24,8 +24,10 @@ class AuthRepository():
         user = self.user_repository.get_user_by_username(username)
         return str(user.id) if user else None
 
-    def delete_session(self) -> None:
-        
+    def delete_session(self, user_uuid: str) -> None:
+        query = delete(SessionModel).where(SessionModel.user_uuid==user_uuid)
+        self.db.execute(query)
+        self.db.commit()
         return
 
     def create_session(self, session_info: SessionDTO) -> None:
@@ -47,3 +49,8 @@ class AuthRepository():
         self.db.execute(query)
         self.db.commit()
         return
+    
+    def get_session(self, user_uuid: str) -> SessionDTO | None:
+        query = select(SessionModel).where(SessionModel.user_uuid==user_uuid)
+        result = self.db.execute(query).one_or_none()
+        return SessionDTO.model_validate(result) if result is not None else result

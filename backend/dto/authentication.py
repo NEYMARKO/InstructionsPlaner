@@ -23,7 +23,7 @@ class UserCredentials(BaseModel):
 #     expires_at: datetime
 #     valid_until: datetime
 
-class Session(BaseModel):
+class SessionDTO(BaseModel): # otherwise it is ambiguous when working with sqlalchemy.org.Session
     user_uuid: str
     token: str
     refreshes_at: datetime

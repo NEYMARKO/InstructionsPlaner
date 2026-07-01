@@ -41,7 +41,7 @@ class Remark(Base):
     sender_id: Mapped[UUID] = mapped_column(UUID, nullable=False)
     text: Mapped[str] = mapped_column(String, nullable=False)
 
-class Session(Base):
+class SessionModel(Base): # otherwise it is ambiguous when working with sqlalchemy.org.Session
     __tablename__ = "session"
     user_uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)

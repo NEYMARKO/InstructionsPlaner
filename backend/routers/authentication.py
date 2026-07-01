@@ -1,8 +1,8 @@
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
-from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi import Request, HTTPException
 
 from ..db import get_db
 from ..services.authentication import AuthService
@@ -17,8 +17,8 @@ def is_authenticated(request: Request, db: Annotated[Session, Depends(get_db)]) 
     It then retrives session information for that id from the database and checks whether it has expired.
     In case session is no longer valid, exception with status `401` is thrown - user will have to log in again.
     """
-    session_id = request.cookies.get("sid")
-    if not session_id:
+    token = request.cookies.get(SESSION_TOKEN_STR)
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return True
 
@@ -26,7 +26,7 @@ def get_service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
     return AuthService(db)
 
 @router.post("/login")
-async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> None:
+async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
     service_response: LoginResponse = service.login(credentials)
     response = JSONResponse(
         content={"message": service_response.message}
@@ -48,4 +48,21 @@ async def login(credentials: UserCredentials, service: Annotated[AuthService, De
         samesite="lax",
         max_age=3600
     )
-    return
+    return response
+
+@router.post("/logout")
+async def logout(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
+    user_uuid = request.cookies.get(SESSION_USER_UUID_STR, "")
+    service.logout(user_uuid)
+    
+    response = JSONResponse(
+        content={"message": "Successfully logged out"}
+    )
+    response.delete_cookie(SESSION_TOKEN_STR) 
+    response.delete_cookie(SESSION_USER_UUID_STR) # cookies are not tied to the `Response`` object (you don't need to pass reference)
+                                                  # we receive from FastAPI. They're tied to browser (or Postman) and the browser updates
+                                                  # them based on Set-Cookie headers in response => imagine it as sending a signal through
+                                                  # the browser that will invalidate cookies with SESSION_TOKEN_STR and SESSION_USER_UUID_STR
+                                                  # keys => delete_cookie sends signal in the browser which makes browser invalidate them - sets their
+                                                  # expiration day to 01.01.1970
+    return response
