@@ -6,14 +6,14 @@ import smtplib
 import traceback
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
 from email.utils import formatdate
+from sqlalchemy.orm import Session
 from email.mime.text import MIMEText
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
-from ..dto.user import EmailConfirmationBase
 from email.mime.multipart import MIMEMultipart
+
+from ..dto.user import EmailConfirmationBase
 from ..repositories.user import UserRepository
 from ..dto.user import UserResponse, UserRequest
 
@@ -56,6 +56,18 @@ def send_confirmation_mail(email, confirmation_uuid: uuid.UUID) -> None:
     
     return
 
+class RequestDuplicateException(Exception):
+    pass
+
+class RequestTimeoutException(Exception):
+    pass
+
+class UserIdNotProvidedException(Exception):
+    pass
+
+class UserNotFoundException(Exception):
+    pass
+
 class UserService():
 
     def __init__(self, db: Session):
@@ -87,7 +99,7 @@ class UserService():
         try:
             self.repository.add_mail_verification_info(EmailConfirmationBase(email=email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
         except IntegrityError:
-            raise HTTPException(status_code=409, detail="Request has already been sent for this email address")
+            raise RequestDuplicateException("Request has already been sent for this email address")
         
         send_confirmation_mail(email, confirmation_uuid)
         
@@ -102,10 +114,16 @@ class UserService():
 
     async def create_user(self, user: UserRequest) -> UserResponse:
         if not await self.validate_email(user.email):
-            raise HTTPException(status_code=408, detail="Wait time exceeded: mail not verified in time")
+            raise RequestTimeoutException("Wait time exceeded: mail not verified in time")
         self.repository.delete_mail_verification_info(user.email)
         return self.repository.save_user(user)
     
     def get_users(self) -> list[UserResponse]:
         return self.repository.get_users()
     
+    def get_profile(self, user_id: str) -> UserResponse:
+        if not user_id:
+            raise UserIdNotProvidedException("User id hasn't been provided")
+        if (result := self.repository.get_profile(user_id)) is None:
+            raise UserNotFoundException(f"Can't locate user with id: {user_id}")
+        return result

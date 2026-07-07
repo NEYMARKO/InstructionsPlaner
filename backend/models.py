@@ -23,7 +23,7 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     is_student: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
-    r_session: Mapped[UUID] = relationship(
+    r_session: Mapped[list[UUID]] = relationship(
         "SessionModel",
         back_populates="r_user",
         cascade="all, delete"
@@ -52,7 +52,8 @@ class SessionModel(Base): # otherwise it is ambiguous when working with sqlalche
     session_uuid: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_uuid: Mapped[UUID] = mapped_column(
         UUID, 
-        ForeignKey("user.id")
+        ForeignKey("user.id"),
+        unique=False
     )
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     refreshes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

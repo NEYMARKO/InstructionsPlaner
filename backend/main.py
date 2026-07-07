@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from backend.routers.user import router as users_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
-from backend.routers.authentication import router as auth_router
+from backend.routers.user import router as user_router, protected_router as protected_user_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
+from backend.routers.authentication import router as auth_router, protected_router as protected_auth_router
 from .models import Base
 from .db import engine
 
@@ -13,5 +13,7 @@ async def lifespan(app: FastAPI):
           # will be executed after application has finished
 
 app = FastAPI(lifespan=lifespan) # this gets triggered every time application is started or when code changes are saved
-app.include_router(users_router)
+app.include_router(user_router)
+app.include_router(protected_user_router)
 app.include_router(auth_router)
+app.include_router(protected_auth_router)

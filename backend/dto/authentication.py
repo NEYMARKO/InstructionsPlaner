@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
@@ -24,7 +25,7 @@ class UserCredentials(BaseModel):
 #     valid_until: datetime
 
 class SessionDTO(BaseModel): # otherwise it is ambiguous when working with sqlalchemy.org.Session
-    user_uuid: str
+    user_uuid: UUID
     token: str
     refreshes_at: datetime
     valid_until: datetime | None = None

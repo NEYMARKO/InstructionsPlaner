@@ -1,4 +1,6 @@
+from uuid import UUID
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 from sqlalchemy import insert, update, select, delete
 
 from .user import UserRepository
@@ -27,21 +29,24 @@ class AuthRepository():
         user = self.user_repository.get_user_by_username(username)
         return str(user.id) if user else None
 
-    def delete_session(self, user_uuid: str) -> None:
-        query = delete(SessionModel).where(SessionModel.user_uuid==user_uuid)
+    def delete_session(self, user_id: UUID, token: str) -> None:
+        query = delete(SessionModel).where(
+            (SessionModel.user_uuid==user_id) & (SessionModel.token==token)
+        )
         self.db.execute(query)
         self.db.commit()
         return
-
-    # def create_session(self, session_info: SessionDTO) -> None:
-    #     query = insert(SessionModel).values(
-    #         user_uuid=session_info.user_uuid, token=session_info.token, 
-    #         refreshes_at=session_info.refreshes_at, valid_until=session_info.valid_until
-    #     )
-    #     self.db.execute(query)
-    #     self.db.commit()
-    #     return
-    def create_session(self, session_model: SessionModel) -> None:
+    
+    def create_session(
+            self, token: str, refreshes_at: datetime, 
+            valid_until: datetime, user_model: UserModel
+        ) -> None:
+        session_model = SessionModel(
+            token=token,
+            refreshes_at=refreshes_at,
+            valid_until=valid_until,
+            r_user=user_model
+        )
         self.db.add(session_model)
         self.db.commit()
         return
@@ -57,8 +62,21 @@ class AuthRepository():
         self.db.commit()
         return
     
-    def get_session(self, user_uuid: str) -> SessionDTO | None:
-        query = select(SessionModel).where(SessionModel.user_uuid==user_uuid)
+    def get_session(self, user_uuid: UUID, token: str) -> SessionDTO | None:
+        query = select(SessionModel).where(
+                (SessionModel.user_uuid==user_uuid) & (SessionModel.token==token)
+        )
         result = self.db.scalars(query).one_or_none()
         print(f"{result=}")
         return SessionDTO.model_validate(result) if result is not None else result
+    
+    def delete_stale_sessions(self) -> None:
+        self.db.execute(
+            delete(SessionModel).where(SessionModel.valid_until < datetime.now(timezone.utc))
+        )
+        self.db.commit()
+        return
+
+    def rollback(self) -> None:
+        self.db.rollback()
+        return

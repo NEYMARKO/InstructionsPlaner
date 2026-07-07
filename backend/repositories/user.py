@@ -1,5 +1,5 @@
-from ..dto.user import UserResponse, UserRequest, EmailConfirmationBase
 from ..models import UserModel, EmailConfirmation
+from ..dto.user import UserResponse, UserRequest, EmailConfirmationBase
 
 from uuid import UUID
 from sqlalchemy import text
@@ -64,3 +64,11 @@ class UserRepository():
     def get_user_by_id(self, id: UUID) -> UserModel | None:
         query = select(UserModel).where(UserModel.id==id)
         return self.db.execute(query).scalar_one_or_none()
+
+    def get_profile(self, user_id: str) -> UserResponse | None:
+        result = self.db.execute(
+            select(UserModel).where(UserModel.id==UUID(user_id))
+        ).scalar_one_or_none()
+        if result is None:
+            return None
+        return UserResponse.model_validate(result)

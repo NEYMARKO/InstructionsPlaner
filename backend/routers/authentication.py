@@ -5,9 +5,9 @@ from fastapi.responses import JSONResponse
 from fastapi import Request, HTTPException
 
 from ..db import get_db
-from ..services.authentication import AuthService
-from ..dto.authentication import UserCredentials, LoginResponse
+from ..dto.authentication import UserCredentials
 from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR
+from ..services.authentication import AuthService, InvalidLoginCredentialsException, UserNotFoundException, InternalServerException
 
 router = APIRouter(prefix="/auth")
 
@@ -22,14 +22,29 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
     """
     token = request.cookies.get(SESSION_TOKEN_STR)
     if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    if not service.token_valid(request=request):
-        raise HTTPException(status_code=401, detail="Session expired")
+        raise HTTPException(status_code=401, detail="Not authenticated - token missing")
+    try:
+        user_id: str = request.cookies.get(SESSION_USER_UUID_STR, "")
+        token = request.cookies.get(SESSION_TOKEN_STR, "")
+        if not service.token_valid(user_id=user_id, token=token):
+            raise HTTPException(status_code=401, detail="Not authenticated - session expired")
+    except InternalServerException as e:
+        raise HTTPException(status_code=500, detail=str(e))
     return True
+
+protected_router = APIRouter(prefix="/auth", dependencies=[Depends(is_authenticated)])
 
 @router.post("/login")
 async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
-    service_response: LoginResponse = service.login(credentials)
+    service_response = None
+    try:
+        service_response = service.login(credentials)
+    except InvalidLoginCredentialsException as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except UserNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except InternalServerException as e:
+        raise HTTPException(status_code=500, detail=str(e))
     response = JSONResponse(
         content={"message": service_response.message}
     )
@@ -52,10 +67,11 @@ async def login(credentials: UserCredentials, service: Annotated[AuthService, De
     )
     return response
 
-@router.post("/logout")
+@protected_router.post("/logout")
 async def logout(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
-    user_uuid = request.cookies.get(SESSION_USER_UUID_STR, "")
-    service.logout(user_uuid)
+    user_id = request.cookies.get(SESSION_USER_UUID_STR, "")
+    token = request.cookies.get(SESSION_TOKEN_STR, "")
+    service.logout(user_id=user_id, token=token)
     
     response = JSONResponse(
         content={"message": "Successfully logged out"}
