@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer, String, Boolean, TIMESTAMP, DateTime, func
+from sqlalchemy import Integer, String, Boolean, TIMESTAMP, DateTime, ForeignKey, func
 
 import uuid
 
@@ -15,13 +15,19 @@ class EmailConfirmation(Base):
     activated: Mapped[bool] = mapped_column(Boolean)
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = "user"
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     is_student: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+    r_session: Mapped[UUID] = relationship(
+        "SessionModel",
+        back_populates="r_user",
+        cascade="all, delete"
+    ) # if user gets deleted, delete all sessions that reference him
 
 class Group(Base):
     __tablename__ = "group"
@@ -43,7 +49,17 @@ class Remark(Base):
 
 class SessionModel(Base): # otherwise it is ambiguous when working with sqlalchemy.org.Session
     __tablename__ = "session"
-    user_uuid: Mapped[str] = mapped_column(String, primary_key=True, default=str(uuid.uuid4))
+    session_uuid: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user_uuid: Mapped[UUID] = mapped_column(
+        UUID, 
+        ForeignKey("user.id")
+    )
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     refreshes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    
+    #https://www.codearmo.com/python-tutorial/sql-alchemy-foreign-keys-and-relationships
+    r_user: Mapped[UserModel] = relationship(
+        "UserModel",
+        back_populates="r_session"
+    )

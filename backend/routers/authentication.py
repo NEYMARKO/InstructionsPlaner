@@ -11,7 +11,10 @@ from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR
 
 router = APIRouter(prefix="/auth")
 
-def is_authenticated(request: Request, db: Annotated[Session, Depends(get_db)]) -> bool:
+def get_service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
+    return AuthService(db)
+
+def is_authenticated(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> bool:
     """
     Checks whether user is authenticated by getting user's `session_id` stored in cookie.
     It then retrives session information for that id from the database and checks whether it has expired.
@@ -20,10 +23,9 @@ def is_authenticated(request: Request, db: Annotated[Session, Depends(get_db)]) 
     token = request.cookies.get(SESSION_TOKEN_STR)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    if not service.token_valid(request=request):
+        raise HTTPException(status_code=401, detail="Session expired")
     return True
-
-def get_service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
-    return AuthService(db)
 
 @router.post("/login")
 async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:

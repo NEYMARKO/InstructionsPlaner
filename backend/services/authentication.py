@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, Request
 from datetime import datetime, timedelta, timezone
 
-
 from ..shared import SESSION_USER_UUID_STR
+from ..models import UserModel, SessionModel
 from ..repositories.authentication import AuthRepository
 from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO
 
@@ -26,7 +26,6 @@ class AuthService():
         valid credentials, session is created and session id is passed through cookies in response.    
         """
         password = ""
-
         try:
             password = self.repository.get_user_password(user_credentials.username)
         except ValueError:
@@ -35,46 +34,60 @@ class AuthService():
         if user_credentials.password != password:
             raise HTTPException(status_code=401, detail="Invalid login credentials")
         
+        # Save session to db to compare it during every access to restriced endpoint
         user_uuid, token = self.create_session(user_credentials.username)
 
-        # Save session to db to compare it during every access to restriced endpoint
+        if not user_uuid or not token:
+            raise 
         return LoginResponse(message="Successfully logged in", user_uuid_str=user_uuid, token=token)
+
+    def token_expired(self, valid_until: datetime | None) -> bool:
+        # valid_until is of type: datetime | None => check whether it is None before comparing it
+        return valid_until is not None and valid_until < datetime.now(timezone.utc)
+
+    def token_requires_refresh(self, refresh_at: datetime) -> bool:
+        return refresh_at < datetime.now(timezone.utc)
 
     def create_session(self, username: str) -> tuple[str, str]:
         token = generate_token()
-        user_uuid = self.repository.get_user_uuid(username)
-        if not user_uuid:
+        user_model: UserModel | None = self.repository.get_user_by_username(username)
+        if not user_model:
             raise HTTPException(status_code=404, detail="Unable to find user with given username")
-
-        session = self.repository.get_session(user_uuid)
-        if session: # if session shouldn't be refreshed yet, return result
-            if session.valid_until and session.valid_until < datetime.now(timezone.utc): # valid until is of type: datetime | None => check whether it is None before comparing it 
-                # print(f"VALID UNTIL: {session.valid_until}")
-                # print(f"NOW: {datetime.now(timezone.utc)}")
+        
+        user_id = user_model.id
+        if session := self.repository.get_session(str(user_id)):
+            if self.token_expired(session.valid_until): 
                 print("[SESSION::TOKEN_EXPIRED]: valid_until timestamp exceeded => deleting session")
-                self.repository.delete_session(user_uuid)
+                self.repository.delete_session(str(user_id))
                 return ("", "")
-            elif session.refreshes_at < datetime.now(timezone.utc):
+            elif self.token_requires_refresh(session.refreshes_at):
                 print("[SESSION::TOKEN_REFRESH]: Token's refresh threshold exceeded => refreshing it")
-                self.refresh_token(user_uuid=user_uuid)
-                return (user_uuid, session.token)
+                self.refresh_token(user_uuid=str(user_id))
+                return (str(user_id), session.token)
             else:
                 print("[SESSION::TOKEN_UNCHANGED]")
                 return (session.user_uuid, session.token)
         try:
             self.repository.create_session(
-                SessionDTO(
-                user_uuid=user_uuid, token=token,
-                refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS),
-                valid_until=datetime.now() + timedelta(days=TOKEN_VALIDITY_LIFETIME_DAYS)
+                SessionModel(
+                    user_uuid=user_id,
+                    token=token,
+                    refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS),
+                    valid_until=datetime.now() + timedelta(days=TOKEN_VALIDITY_LIFETIME_DAYS),
+                    r_user=user_model
                 )
+                # SessionDTO(
+                # user_uuid=user_id, token=token,
+                # refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS),
+                # valid_until=datetime.now() + timedelta(days=TOKEN_VALIDITY_LIFETIME_DAYS)
+                # )
             )
-            print("[SESSION::CREATION]: created session")
+            print("[SESSION::CREATE]: created session")
         
-        except psycopg2.errors.UniqueViolation: # tried to adding session for same user
+        except psycopg2.errors.UniqueViolation: # tried to add session for user who already has it
             return ("", "")
         
-        return (user_uuid, token)
+        return (str(user_id), token)
     
     def refresh_token(self, user_uuid: str = "", request: Request | None = None) -> None:
         if not user_uuid and not request:
@@ -88,7 +101,16 @@ class AuthService():
             refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS)
         ))
         return
-    
+
+    def token_valid(self, request: Request) -> bool:
+        user_uuid = request.cookies.get(SESSION_USER_UUID_STR, "")
+        session = self.repository.get_session(user_uuid)
+        if not session or self.token_expired(session.valid_until):
+            return False
+        elif self.token_requires_refresh(session.refreshes_at):
+            self.refresh_token(user_uuid=user_uuid)
+        return True
+
     def logout(self, user_uuid: str) -> None:
         self.repository.delete_session(user_uuid)
         return

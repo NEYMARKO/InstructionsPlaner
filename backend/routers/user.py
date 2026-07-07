@@ -9,6 +9,9 @@ from ..dto.user import UserResponse, UserRequest
 
 router = APIRouter(prefix="/users")
 
+# this needs to be dependency because it is using db Session, which is getting destroyed after endpoint has ran
+# => if UserService object didn't also get destroyed, it would hold reference to stale/destroyed Session object
+# (repository would actually store that stale value, but service stores repository reference, which stores Session reference)
 def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
     """
     Since `UserService` holds a `db` session, and sessions are request-scoped, not application scoped,

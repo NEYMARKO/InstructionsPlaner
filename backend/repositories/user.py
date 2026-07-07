@@ -1,5 +1,5 @@
 from ..dto.user import UserResponse, UserRequest, EmailConfirmationBase
-from ..models import User, EmailConfirmation
+from ..models import UserModel, EmailConfirmation
 
 from uuid import UUID
 from sqlalchemy import text
@@ -14,7 +14,7 @@ class UserRepository():
 
     def save_user(self, new_user: UserRequest) -> UserResponse:
         # IN CASE OF WRITING SQL, write: SELECT * FROM public.user => NOTICE THAT SCHEMA NAME IS SPECIFIED ASWELL
-        new_user_model = User(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
+        new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
         self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
         self.db.commit()
         self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
@@ -57,11 +57,10 @@ class UserRepository():
         self.db.commit()
         return
     
-    def get_user_by_username(self, username: str) -> User | None:
-        query = select(User).where(User.username==username)
-        try:
-            return (
-                self.db.execute(query).scalar_one_or_none()
-            )
-        except MultipleResultsFound:
-            raise ValueError(f"Mutliple users found with username: '{username}'")
+    def get_user_by_username(self, username: str) -> UserModel | None:
+        query = select(UserModel).where(UserModel.username==username)
+        return self.db.execute(query).scalar_one_or_none()
+        
+    def get_user_by_id(self, id: UUID) -> UserModel | None:
+        query = select(UserModel).where(UserModel.id==id)
+        return self.db.execute(query).scalar_one_or_none()

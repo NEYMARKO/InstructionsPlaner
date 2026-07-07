@@ -2,14 +2,17 @@ from sqlalchemy.orm import Session
 from sqlalchemy import insert, update, select, delete
 
 from .user import UserRepository
-from ..models import SessionModel 
+from ..models import SessionModel, UserModel
 from ..dto.authentication import SessionDTO 
 
 class AuthRepository():
     def __init__(self, db: Session) -> None:
         self.db = db
         self.user_repository = UserRepository(db)
-    
+
+    def get_user_by_username(self, username: str) -> UserModel | None:
+        return self.user_repository.get_user_by_username(username)
+
     def get_user_password(self, username: str) -> str | None:
         """
         Retrives password for provided username.
@@ -30,12 +33,16 @@ class AuthRepository():
         self.db.commit()
         return
 
-    def create_session(self, session_info: SessionDTO) -> None:
-        query = insert(SessionModel).values(
-            user_uuid=session_info.user_uuid, token=session_info.token, 
-            refreshes_at=session_info.refreshes_at, valid_until=session_info.valid_until
-        )
-        self.db.execute(query)
+    # def create_session(self, session_info: SessionDTO) -> None:
+    #     query = insert(SessionModel).values(
+    #         user_uuid=session_info.user_uuid, token=session_info.token, 
+    #         refreshes_at=session_info.refreshes_at, valid_until=session_info.valid_until
+    #     )
+    #     self.db.execute(query)
+    #     self.db.commit()
+    #     return
+    def create_session(self, session_model: SessionModel) -> None:
+        self.db.add(session_model)
         self.db.commit()
         return
 
