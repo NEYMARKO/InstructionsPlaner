@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
@@ -5,9 +6,14 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi import Request, HTTPException
 
 from ..db import get_db
+from ..dto.user import UserRequest
 from ..dto.authentication import UserCredentials
 from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
-from ..services.authentication import AuthService, InvalidLoginCredentialsException, UserNotFoundException, InternalServerException
+from ..services.authentication import (
+    AuthService, InvalidLoginCredentialsException, UserCreationException, 
+    UserNotFoundException, InternalServerException, 
+    EmailConfirmationValidationException, RequestTimeoutException, RequestDuplicateException
+    )
 
 router = APIRouter(prefix="/auth")
 
@@ -43,6 +49,7 @@ def get_login(request: Request):
 @router.post("/login")
 async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
     service_response = None
+    print(f"[LOGIN] passed credentials: {credentials}")
     try:
         service_response = service.login(credentials)
     except InvalidLoginCredentialsException as e:
@@ -72,6 +79,30 @@ async def login(credentials: UserCredentials, service: Annotated[AuthService, De
         max_age=3600
     )
     return response
+
+@router.get("/sign-up", response_class=HTMLResponse)
+def get_sign_up(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="registration/register.html"
+    )
+
+@router.post("/sign-up", response_class=HTMLResponse)
+async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]):
+    try:
+        await service.sign_up(user)
+    except RequestTimeoutException as e:
+        raise HTTPException(status_code=408, detail=str(e))
+    except RequestDuplicateException as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except (EmailConfirmationValidationException, UserCreationException) as e:
+        raise(HTTPException(status_code=500, detail=str(e)))
+    return templates.TemplateResponse(
+        request=request, name="registration/register.html"
+    )
+
+@router.get("/confirm/{uuid}")
+async def confirm_email(uuid: UUID, service: Annotated[AuthService, Depends(get_service)]) -> str:
+    return service.confirm_mail(uuid)
 
 @protected_router.post("/logout")
 async def logout(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:

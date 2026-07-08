@@ -1,17 +1,45 @@
+import os
 import uuid
+import smtplib
+import asyncio
 import psycopg2
+import traceback
 from hashlib import sha256
+from email.utils import formatdate
 from sqlalchemy.orm import Session
+from email.mime.text import MIMEText
+from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 
+from ..services.user import UserService
+from ..dto.user import UserRequest, UserResponse
 from ..repositories.authentication import AuthRepository
-from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO
+from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO, EmailConfirmationBase
 
 def generate_token() -> str:
     return sha256(str(uuid.uuid4()).encode('utf-8')).hexdigest()
 
 TOKEN_REFRESH_LIFETIME_HOURS = 2
 TOKEN_VALIDITY_LIFETIME_DAYS = 2 
+
+CHECK_INTERVAL_SEC = 2
+
+class RequestDuplicateException(Exception):
+    pass
+
+class RequestTimeoutException(Exception):
+    pass
+
+class EmailConfirmationValidationException(Exception):
+    pass
+
+class UserCreationException(Exception):
+    pass
+
+class UserIdNotProvidedException(Exception):
+    pass
 
 class InvalidLoginCredentialsException(Exception):
     pass
@@ -22,10 +50,98 @@ class UserNotFoundException(Exception):
 class InternalServerException(Exception):
     pass
 
+def send_confirmation_mail(email, confirmation_uuid: uuid.UUID) -> None:
+    
+    mail_sender = os.getenv("MAIL_SENDER")
+    mail_sender_pass = os.getenv("MAIL_SENDER_PASS")
+
+    if not mail_sender or not mail_sender_pass:
+        raise RuntimeError("Can't locate mail sender or his password in env")
+
+    SMTPServer = "smtp.office365.com"
+    SMTPPort = 587
+    recipients = [email]
+
+    subject = "E-mail confirmation"
+    body = f'Please confirm your email by clicking on the following link: <a href="http://127.0.0.1:8000/auth/confirm/{confirmation_uuid}">Confirm</a>'
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = mail_sender
+        msg['To'] = ", ".join(recipients)
+        msg['Date'] = formatdate(localtime=True)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, "html", "utf-8"))
+        server = smtplib.SMTP(SMTPServer, SMTPPort)
+        server.connect(SMTPServer, SMTPPort)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(mail_sender, mail_sender_pass)
+        server.send_message(msg)
+        server.quit()
+    except Exception:
+        print(f"{traceback.format_exc()=}")
+    
+    return
+
 class AuthService():
     def __init__(self, db: Session) -> None:
+        self.user_service = UserService(db)
         self.repository = AuthRepository(db)
     
+    def email_confirmed(self, email: str, wait_time: int) -> bool:
+        """
+        Returns True in case `activated` attribute is set to `True` and not more than `wait_time` seconds have
+        elapsed since the time user creation has been requested (`requested_at` attribute). 
+
+        :param str email: Email address of person requesting creation
+        :param int wait_time: Time interval in which email activation link is valid
+        :return: `True` if activation link has been clicked before time has ran out, `False` otherwise
+        """
+        confirm_obj = None
+        try:
+            confirm_obj = self.repository.get_mail_verification_info(email)
+        except ValidationError:
+            raise EmailConfirmationValidationException("Email confirmation could not get validated")
+        return confirm_obj.activated and (datetime.now(timezone.utc) - confirm_obj.requested_at).total_seconds() < wait_time
+
+
+    async def validate_email(self, email: str, wait_time: int = 60) -> bool:
+        """
+        Sends e-mail with activation link to the provided e-mail address (`email`) and waits
+        `wait_time` seconds for user to confirm. In case `wait_time` is exceeded, exception is
+        thrown.
+        """
+        confirmation_uuid = uuid.uuid4()
+        
+        try:
+            self.repository.add_mail_verification_info(EmailConfirmationBase(email=email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
+        except IntegrityError:
+            raise RequestDuplicateException("Request has already been sent for this email address")
+        
+        send_confirmation_mail(email, confirmation_uuid)
+        
+        start = datetime.now()
+        while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
+            await asyncio.sleep(CHECK_INTERVAL_SEC)
+        self.repository.delete_mail_verification_info(email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
+        return confirmed
+
+    def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
+        self.repository.update_mail_verification_info(validation_uuid)
+        return "Your confirmation has been registered"
+
+    async def sign_up(self, user: UserRequest) -> UserResponse:
+        result = None
+        if not await self.validate_email(user.email):
+            raise RequestTimeoutException("Wait time exceeded: mail not verified in time")
+        try:
+            result = self.user_service.add_user(user)
+        except ValidationError:
+            raise UserCreationException("Problems with creating user")
+        return result
+
     def login(self, user_credentials: UserCredentials) -> LoginResponse:
         """
         Checks whether user with these particular credentials exists. In case user has logged with

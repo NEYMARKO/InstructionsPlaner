@@ -1,11 +1,11 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
-from sqlalchemy import insert, update, select, delete
+from sqlalchemy import update, select, delete
 
 from .user import UserRepository
-from ..models import SessionModel, UserModel
-from ..dto.authentication import SessionDTO 
+from ..models import SessionModel, UserModel, EmailConfirmation
+from ..dto.authentication import SessionDTO, EmailConfirmationBase
 
 class AuthRepository():
     def __init__(self, db: Session) -> None:
@@ -37,6 +37,29 @@ class AuthRepository():
         self.db.commit()
         return
     
+    def add_mail_verification_info(self, e_obj: EmailConfirmationBase) -> None:
+        email_conf_model = EmailConfirmation(email=e_obj.email, sent_uuid=e_obj.sent_uuid, activated=e_obj.activated, requested_at=e_obj.requested_at)
+        self.db.add(email_conf_model)
+        self.db.commit()
+        return
+
+
+    def get_mail_verification_info(self, email: str) -> EmailConfirmationBase:
+        result = self.db.query(EmailConfirmation).get(email) # SELECT (read) does not need commit() - only INSERT, UPDATE and DELETE require it
+        return EmailConfirmationBase.model_validate(result)
+
+    def update_mail_verification_info(self, uuid: UUID) -> None:
+        self.db.query(EmailConfirmation).\
+            filter(EmailConfirmation.sent_uuid == uuid).\
+                update({"activated": True})
+        self.db.commit()
+        return
+
+    def delete_mail_verification_info(self, email: str) -> None:
+        self.db.query(EmailConfirmation).filter(EmailConfirmation.email == email).delete()
+        self.db.commit()
+        return
+
     def create_session(
             self, token: str, refreshes_at: datetime, 
             valid_until: datetime, user_model: UserModel

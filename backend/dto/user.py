@@ -17,15 +17,6 @@ class UserResponse(UserBase):
 class UserRequest(UserBase):
     password: str
 
-class EmailConfirmationBase(BaseModel):
-    email: str
-    sent_uuid: UUID
-    activated: bool
-    requested_at: datetime
-    model_config = {
-        "from_attributes": True
-    }
-
 # class UserResponse(BaseModel):
 #     id: UUID
 #     username: str

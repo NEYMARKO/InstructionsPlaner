@@ -3,15 +3,12 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request, HTTPException
 
+
 from ..db import get_db
-from ..services.user import UserService
+from backend.dto.user import UserResponse
 from ..shared import SESSION_USER_UUID_STR
 from .authentication import is_authenticated 
-from ..dto.user import UserResponse, UserRequest
-from ..services.user import (
-    UserNotFoundException, UserIdNotProvidedException, 
-    EmailConfirmationValidationException, RequestDuplicateException, RequestTimeoutException
-)
+from ..services.user import UserService, UserNotFoundException, UserIdNotProvidedException
 
 router = APIRouter(prefix="/users")
 
@@ -46,27 +43,6 @@ def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
 @router.get("/")
 async def get_users(service: Annotated[UserService, Depends(get_user_service)]) -> list[UserResponse]:
     return service.get_users()
-
-@router.post("/create")
-async def create_user(user: UserRequest, service: Annotated[UserService, Depends(get_user_service)]) -> UserResponse:
-    result = None
-    try:
-        result = await service.create_user(user)
-    except RequestTimeoutException as e:
-        raise HTTPException(status_code=408, detail=str(e))
-    except RequestDuplicateException as e:
-        raise HTTPException(status_code=409, detail=str(e))
-    except EmailConfirmationValidationException as e:
-        raise(HTTPException(status_code=500, detail=str(e)))
-    return result
-
-# @router.delete("/delete/{id}")
-# async def delete_user(id: UUID, service: Annotated[UserService, Depends(get_user_service)]) -> None:
-#     return service.delete_user(id)
-
-@router.get("/confirm/{uuid}")
-async def confirm_email(uuid: uuid.UUID, service: Annotated[UserService, Depends(get_user_service)]) -> str:
-    return service.confirm_mail(uuid)
 
 @protected_router.get("/profile")
 async def get_profile(request: Request, service: Annotated[UserService, Depends(get_user_service)]) -> UserResponse:

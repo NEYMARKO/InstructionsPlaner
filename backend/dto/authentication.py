@@ -30,3 +30,12 @@ class SessionDTO(BaseModel): # otherwise it is ambiguous when working with sqlal
     refreshes_at: datetime
     valid_until: datetime | None = None
     model_config = ConfigDict(from_attributes=True)
+
+class EmailConfirmationBase(BaseModel):
+    email: str
+    sent_uuid: UUID
+    activated: bool
+    requested_at: datetime
+    model_config = {
+        "from_attributes": True
+    }
