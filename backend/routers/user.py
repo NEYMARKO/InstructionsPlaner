@@ -8,7 +8,10 @@ from ..services.user import UserService
 from ..shared import SESSION_USER_UUID_STR
 from .authentication import is_authenticated 
 from ..dto.user import UserResponse, UserRequest
-from ..services.user import UserNotFoundException, UserIdNotProvidedException, RequestDuplicateException, RequestTimeoutException
+from ..services.user import (
+    UserNotFoundException, UserIdNotProvidedException, 
+    EmailConfirmationValidationException, RequestDuplicateException, RequestTimeoutException
+)
 
 router = APIRouter(prefix="/users")
 
@@ -49,10 +52,12 @@ async def create_user(user: UserRequest, service: Annotated[UserService, Depends
     result = None
     try:
         result = await service.create_user(user)
-    except RequestDuplicateException as e:
-        raise HTTPException(status_code=409, detail=str(e))
     except RequestTimeoutException as e:
         raise HTTPException(status_code=408, detail=str(e))
+    except RequestDuplicateException as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except EmailConfirmationValidationException as e:
+        raise(HTTPException(status_code=500, detail=str(e)))
     return result
 
 # @router.delete("/delete/{id}")

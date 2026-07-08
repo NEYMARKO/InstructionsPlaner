@@ -8,6 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from email.utils import formatdate
 from sqlalchemy.orm import Session
+from pydantic import ValidationError
 from email.mime.text import MIMEText
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
@@ -62,6 +63,9 @@ class RequestDuplicateException(Exception):
 class RequestTimeoutException(Exception):
     pass
 
+class EmailConfirmationValidationException(Exception):
+    pass
+
 class UserIdNotProvidedException(Exception):
     pass
 
@@ -85,7 +89,11 @@ class UserService():
         :param int wait_time: Time interval in which email activation link is valid
         :return: `True` if activation link has been clicked before time has ran out, `False` otherwise
         """
-        confirm_obj = self.repository.get_mail_verification_info(email)
+        confirm_obj = None
+        try:
+            confirm_obj = self.repository.get_mail_verification_info(email)
+        except ValidationError:
+            raise EmailConfirmationValidationException("Email confirmation could not get validated")
         return confirm_obj.activated and (datetime.now(timezone.utc) - confirm_obj.requested_at).total_seconds() < wait_time
 
     async def validate_email(self, email: str, wait_time: int = 60) -> bool:
@@ -106,6 +114,7 @@ class UserService():
         start = datetime.now()
         while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
             await asyncio.sleep(CHECK_INTERVAL_SEC)
+        self.repository.delete_mail_verification_info(email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
         return confirmed
     
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
@@ -115,7 +124,6 @@ class UserService():
     async def create_user(self, user: UserRequest) -> UserResponse:
         if not await self.validate_email(user.email):
             raise RequestTimeoutException("Wait time exceeded: mail not verified in time")
-        self.repository.delete_mail_verification_info(user.email)
         return self.repository.save_user(user)
     
     def get_users(self) -> list[UserResponse]:

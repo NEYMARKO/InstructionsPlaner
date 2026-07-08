@@ -1,12 +1,12 @@
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi import Request, HTTPException
 
 from ..db import get_db
 from ..dto.authentication import UserCredentials
-from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR
+from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
 from ..services.authentication import AuthService, InvalidLoginCredentialsException, UserNotFoundException, InternalServerException
 
 router = APIRouter(prefix="/auth")
@@ -27,12 +27,18 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
         user_id: str = request.cookies.get(SESSION_USER_UUID_STR, "")
         token = request.cookies.get(SESSION_TOKEN_STR, "")
         if not service.token_valid(user_id=user_id, token=token):
-            raise HTTPException(status_code=401, detail="Not authenticated - session expired")
+            raise HTTPException(status_code=401, detail="Not authenticated - session doesn't exist")
     except InternalServerException as e:
         raise HTTPException(status_code=500, detail=str(e))
     return True
 
 protected_router = APIRouter(prefix="/auth", dependencies=[Depends(is_authenticated)])
+
+@router.get("/login", response_class=HTMLResponse)
+def get_login(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="login/login.html"
+    )
 
 @router.post("/login")
 async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
