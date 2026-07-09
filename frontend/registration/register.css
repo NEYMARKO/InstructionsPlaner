@@ -235,3 +235,20 @@ button:active {
 
     box-shadow: none;
 }
+
+.error-box {
+    margin-top: 18px;
+    padding: 12px 14px;
+
+    border: 1px solid #e57373;
+    border-left: 4px solid #d32f2f;
+    border-radius: 10px;
+
+    background: #fdeaea;
+    color: #b71c1c;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-align: center;
+}

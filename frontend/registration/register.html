@@ -1,53 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link href="{{ url_for('frontend', path='registration/register.css') }}" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js">
+    </script>
 </head>
+
 <body>
 
-<div class="login-card">
+    <div class="login-card" data-signals="{username: '', email: '', password: '', isStudent:false}"
+        data-computed:is-student="$isTrainer != true">
 
-    <h1>Sign Up</h1>
+        <h1>Sign Up</h1>
 
-    <form action="/register" method="post">
+        <form data-on:submit="@post('/auth/sign-up')">
 
-        <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            required
-        >
+            <input type="text" data-bind:username placeholder="Username:" required>
 
-        <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            required
-        >
+            <input type="email" data-bind:email placeholder="Email:" required>
 
-        <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-        >
+            <input type="password" data-bind:password placeholder="Password:" required>
 
-        <label class="checkbox">
-            <input
-                type="checkbox"
-                name="is_student"
-            >
-            <span>I am a student</span>
-        </label>
+            <label class="checkbox">
+                <input type="checkbox" data-bind:is-trainer>
+                <span>I am a trainer</span>
+            </label>
 
-        <button type="submit">Create Account</button>
+            <button>Create Account</button>
 
-    </form>
-
-</div>
+        </form>
+        <div class="error-box" data-show="$error" data-text="$error" style="display: none">
+        </div>
+    </div>
 
 </body>
+
 </html>

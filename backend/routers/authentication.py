@@ -2,8 +2,10 @@ from uuid import UUID
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi import Request, HTTPException
+from datastar_py.fastapi import DatastarResponse
+from datastar_py import ServerSentEventGenerator as SSE
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from ..db import get_db
 from ..dto.user import UserRequest
@@ -11,7 +13,7 @@ from ..dto.authentication import UserCredentials
 from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
 from ..services.authentication import (
     AuthService, InvalidLoginCredentialsException, UserCreationException, 
-    UserNotFoundException, InternalServerException, 
+    UserNotFoundException, InternalServerException, EmailAlreadyRegisteredException,
     EmailConfirmationValidationException, RequestTimeoutException, RequestDuplicateException
     )
 
@@ -47,19 +49,21 @@ def get_login(request: Request):
     )
 
 @router.post("/login")
-async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
+async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse:
     service_response = None
     print(f"[LOGIN] passed credentials: {credentials}")
     try:
         service_response = service.login(credentials)
-    except InvalidLoginCredentialsException as e:
-        raise HTTPException(status_code=401, detail=str(e))
-    except UserNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except (InvalidLoginCredentialsException, UserNotFoundException) as e:
+        print(f"ERROR OCCURED: {str(e)}")
+        return DatastarResponse([
+            SSE.patch_signals({"error": str(e)})
+        ])
     except InternalServerException as e:
         raise HTTPException(status_code=500, detail=str(e))
-    response = JSONResponse(
-        content={"message": service_response.message}
+    
+    response = DatastarResponse(
+        SSE.patch_signals({"error": ""})
     )
     response.set_cookie(
         key=SESSION_TOKEN_STR,
@@ -88,16 +92,17 @@ def get_sign_up(request: Request):
 
 @router.post("/sign-up", response_class=HTMLResponse)
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]):
+    # TODO: REMOVE ERROR SIGNAL WHEN SENDING NEW REQUEST
     try:
         await service.sign_up(user)
-    except RequestTimeoutException as e:
-        raise HTTPException(status_code=408, detail=str(e))
-    except RequestDuplicateException as e:
-        raise HTTPException(status_code=409, detail=str(e))
+    except (RequestTimeoutException, RequestDuplicateException, EmailAlreadyRegisteredException) as e:
+        return DatastarResponse([
+            SSE.patch_signals({"error": str(e)})
+        ])
     except (EmailConfirmationValidationException, UserCreationException) as e:
         raise(HTTPException(status_code=500, detail=str(e)))
     return templates.TemplateResponse(
-        request=request, name="registration/register.html"
+        request=request, name="login/login.html"
     )
 
 @router.get("/confirm/{uuid}")

@@ -32,6 +32,9 @@ class RequestDuplicateException(Exception):
 class RequestTimeoutException(Exception):
     pass
 
+class EmailAlreadyRegisteredException(Exception):
+    pass
+
 class EmailConfirmationValidationException(Exception):
     pass
 
@@ -140,6 +143,8 @@ class AuthService():
             result = self.user_service.add_user(user)
         except ValidationError:
             raise UserCreationException("Problems with creating user")
+        except psycopg2.errors.UniqueViolation:
+            raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
         return result
 
     def login(self, user_credentials: UserCredentials) -> LoginResponse:
