@@ -13,7 +13,7 @@
 <body>
 
     <div class="login-card" data-signals="{username: '', email: '', password: '', isStudent:false}"
-        data-computed:is-student="$isTrainer != true">
+        data-computed:is-student="!$_isTrainer">
 
         <h1>Sign Up</h1>
 
@@ -26,7 +26,7 @@
             <input type="password" data-bind:password placeholder="Password:" required>
 
             <label class="checkbox">
-                <input type="checkbox" data-bind:is-trainer>
+                <input type="checkbox" data-bind="_isTrainer">
                 <span>I am a trainer</span>
             </label>
 

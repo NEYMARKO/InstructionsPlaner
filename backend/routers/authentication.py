@@ -3,9 +3,9 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 from fastapi import Request, HTTPException
-from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
 from fastapi.responses import JSONResponse, HTMLResponse
+from datastar_py.fastapi import DatastarResponse, read_signals
 
 from ..db import get_db
 from ..dto.user import UserRequest
@@ -92,7 +92,10 @@ def get_sign_up(request: Request):
 
 @router.post("/sign-up", response_class=HTMLResponse)
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]):
-    # TODO: REMOVE ERROR SIGNAL WHEN SENDING NEW REQUEST
+    # TODO: REMOVE ERROR SIGNAL WHEN SENDING NEW REQUEST - yield a signal_patch?
+    print(f"[USER_REQUEST SIGN-UP]: {user}")
+    signals = await read_signals(request=request)
+    print(f"[SIGNALS SIGN-UP]: {signals}")
     try:
         await service.sign_up(user)
     except (RequestTimeoutException, RequestDuplicateException, EmailAlreadyRegisteredException) as e:
