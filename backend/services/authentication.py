@@ -126,8 +126,13 @@ class AuthService():
         send_confirmation_mail(email, confirmation_uuid)
         
         start = datetime.now()
-        while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
-            await asyncio.sleep(CHECK_INTERVAL_SEC)
+        try:
+            while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
+                await asyncio.sleep(CHECK_INTERVAL_SEC)
+        except asyncio.CancelledError:
+            print("CANCELLED mid-wait")
+            raise
+        print(f"{'-'*50}FINISHED WHILE LOOP{'-'*50}")
         self.repository.delete_mail_verification_info(email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
         return confirmed
 

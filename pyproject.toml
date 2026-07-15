@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [tool.fastapi]
-entrypoint = "backend.main:app"
+entrypoint = "backend.main:app" # root is in the same level as pyproject.toml

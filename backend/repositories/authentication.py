@@ -45,7 +45,9 @@ class AuthRepository():
 
 
     def get_mail_verification_info(self, email: str) -> EmailConfirmationBase:
+        print(f"ZAPOČINJEM PROVJERU ZA MAIL: {email}")
         result = self.db.query(EmailConfirmation).get(email) # SELECT (read) does not need commit() - only INSERT, UPDATE and DELETE require it
+        print(f"PROVJERIO EMAIL ADRESU ({email}), VRAĆAM RESPONSE: {result}")
         return EmailConfirmationBase.model_validate(result)
 
     def update_mail_verification_info(self, uuid: UUID) -> None:
