@@ -41,6 +41,7 @@ class AuthRepository():
         email_conf_model = EmailConfirmation(email=e_obj.email, sent_uuid=e_obj.sent_uuid, activated=e_obj.activated, requested_at=e_obj.requested_at)
         self.db.add(email_conf_model)
         self.db.commit()
+        print("DODAO MAIL ADRESU")
         return
 
 

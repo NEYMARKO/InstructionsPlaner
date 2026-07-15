@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
+from datastar_py import ServerSentEventGenerator as SSE
 
 from ..services.user import UserService
 from ..dto.user import UserRequest, UserResponse
@@ -109,8 +110,21 @@ class AuthService():
             raise EmailConfirmationValidationException("Email confirmation could not get validated")
         return confirm_obj.activated and (datetime.now(timezone.utc) - confirm_obj.requested_at).total_seconds() < wait_time
 
-
-    async def validate_email(self, email: str, wait_time: int = 60) -> bool:
+    async def loop_check(self, user: UserRequest, wait_time: int, start: datetime) -> None:
+        while(not (confirmed:= self.email_confirmed(user.email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
+                print("CHECKING...")
+                await asyncio.sleep(CHECK_INTERVAL_SEC)
+        self.repository.delete_mail_verification_info(user.email)
+        if confirmed:
+            try:
+                self.user_service.add_user(user)
+            except ValidationError:
+                raise UserCreationException("Problems with creating user")
+            except psycopg2.errors.UniqueViolation:
+                raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
+        return
+    
+    async def validate_email(self, user: UserRequest, wait_time: int = 60) -> None:
         """
         Sends e-mail with activation link to the provided e-mail address (`email`) and waits
         `wait_time` seconds for user to confirm. In case `wait_time` is exceeded, exception is
@@ -119,37 +133,33 @@ class AuthService():
         confirmation_uuid = uuid.uuid4()
         
         try:
-            self.repository.add_mail_verification_info(EmailConfirmationBase(email=email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
+            self.repository.add_mail_verification_info(EmailConfirmationBase(email=user.email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
         except IntegrityError:
             raise RequestDuplicateException("Request has already been sent for this email address")
         
-        send_confirmation_mail(email, confirmation_uuid)
+        send_confirmation_mail(user.email, confirmation_uuid)
         
         start = datetime.now()
-        try:
-            while(not (confirmed:= self.email_confirmed(email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
-                await asyncio.sleep(CHECK_INTERVAL_SEC)
-        except asyncio.CancelledError:
-            print("CANCELLED mid-wait")
-            raise
+
+        asyncio.create_task(self.loop_check(user, wait_time, start))
+        # try:
+            
+        # except asyncio.CancelledError:
+        #     print("CANCELLED mid-wait")
+        #     raise
         print(f"{'-'*50}FINISHED WHILE LOOP{'-'*50}")
-        self.repository.delete_mail_verification_info(email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
-        return confirmed
+        # self.repository.delete_mail_verification_info(user.email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
+        return
 
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
+        print("MAIL CONFIRMED")
         self.repository.update_mail_verification_info(validation_uuid)
         return "Your confirmation has been registered"
 
-    async def sign_up(self, user: UserRequest) -> UserResponse:
+    async def sign_up(self, user: UserRequest) -> None:
         result = None
-        if not await self.validate_email(user.email):
-            raise RequestTimeoutException("Wait time exceeded: mail not verified in time")
-        try:
-            result = self.user_service.add_user(user)
-        except ValidationError:
-            raise UserCreationException("Problems with creating user")
-        except psycopg2.errors.UniqueViolation:
-            raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
+        await self.validate_email(user)
+        SSE.patch_signals({"error": "MAIL POSLAN, NAPRAVI CONFIRMATION"})
         return result
 
     def login(self, user_credentials: UserCredentials) -> LoginResponse:
