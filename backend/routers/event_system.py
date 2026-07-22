@@ -1,30 +1,48 @@
+import uuid
 import asyncio
 from fastapi import Request
 from fastapi.routing import APIRouter
 from fastapi.responses import StreamingResponse
 from datastar_py import ServerSentEventGenerator as SSE
 
-from ..notifications import EventSystem
-from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
+from ..shared import EVENT_SUBSCRIPTION_ID
+from ..notifications import event_system as ES
 
 router = APIRouter(prefix="/event-system")
 
 @router.get("/", response_class=StreamingResponse)
 async def open_notification_pipeline(request: Request):
-    session_id = request.cookies.get(SESSION_TOKEN_STR)
-    if not session_id:
-        return
-    event_system = EventSystem()
-    event_system.subscribe_session(session_id, [])
-    try:
-        while True:
-            if await request.is_disconnected():
-                break
-            try:
-                kind, msg = await asyncio.wait_for(event_system.get_session_notifications(session_id), timeout=15)
-                yield SSE.patch_signals({f"{kind}Msg": msg})
-            except asyncio.TimeoutError:
-                yield SSE.patch_signals({}) # heartbeat / keep-alive, prevents idle timeouts
-    finally:
-        event_system.unsubscribe_session(session_id)
-    return
+    e_subs_id = str(uuid.uuid4())
+    async def pipeline():
+        print(f"Listening pipe opened for session: {e_subs_id}...")
+        ES.subscribe_session(e_subs_id, [])
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    session_notifications = await asyncio.wait_for(ES.get_session_notifications(e_subs_id), timeout=15)
+                    if session_notifications:
+                        signals = ES.combine_signals(session_notifications)
+                        yield SSE.patch_signals(signals)
+                        ES.consume_notifications(e_subs_id, session_notifications)
+                except asyncio.TimeoutError:
+                    yield SSE.patch_signals({}) # heartbeat / keep-alive, prevents idle timeouts
+        finally:
+            print(f"Finished listening for session: {e_subs_id}")
+            ES.unsubscribe_session(e_subs_id)
+    response = StreamingResponse(
+        pipeline(),
+        media_type="text/event-stream"
+    )
+    response.set_cookie(
+        key=EVENT_SUBSCRIPTION_ID,
+        # value=service_response.token,
+        value=e_subs_id,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=3600
+    )
+    
+    return response

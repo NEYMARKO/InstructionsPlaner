@@ -12,7 +12,7 @@
 
 <body>
 
-    <div class="login-card" data-signals="{username: '', email: '', password: '', isStudent:false}"
+    <div class="login-card" data-init="@get('/event-system')" data-signals="{username: '', email: '', password: '', isStudent:false}"
         data-computed:is-student="!$_isTrainer">
 
         <h1>Sign Up</h1>

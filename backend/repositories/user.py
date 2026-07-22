@@ -37,6 +37,10 @@ class UserRepository():
     def get_user_by_username(self, username: str) -> UserModel | None:
         query = select(UserModel).where(UserModel.username==username)
         return self.db.execute(query).scalar_one_or_none()
+
+    def get_user_by_email(self, email: str) -> UserModel | None:
+        query = select(UserModel).where(UserModel.email==email)
+        return self.db.execute(query).scalar_one_or_none()
         
     def get_user_by_id(self, id: UUID) -> UserModel | None:
         query = select(UserModel).where(UserModel.id==id)

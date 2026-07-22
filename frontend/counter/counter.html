@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter</title>
+    <link href="{{ url_for('frontend', path='counter/counter.css') }}" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js">
+    </script>
+</head>
+
+<body>
+
+    <div class="container" data-init="@get('/counter/stream')" data-signals="{counter: '0', message: ''}">
+
+        <section class="counter-section">
+            <h1>Counter</h1>
+
+            <!-- Backend renders the current counter -->
+            <div class="counter-value" data-text="$counter">
+                0
+            </div>
+
+            <!-- <div class="button-row">
+                <button class="decrement">-</button>
+                <button class="increment">+</button>
+            </div> -->
+
+            <button data-on:click="@post('/counter')" class="print">
+                Click me!
+            </button>
+        </section>
+
+        <section class="message-section">
+            <h2>Status</h2>
+
+            <!-- Backend renders the latest message -->
+            <div class="message" data-text="$message">
+                Ready to print.
+            </div>
+        </section>
+
+    </div>
+
+</body>
+
+</html>

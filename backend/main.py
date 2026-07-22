@@ -5,6 +5,11 @@ from fastapi.staticfiles import StaticFiles
 from backend.routers.home import router as home_router
 from backend.routers.user import router as user_router, protected_router as protected_user_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
 from backend.routers.authentication import router as auth_router, protected_router as protected_auth_router
+from backend.routers.event_system import router as event_system_router
+
+from backend.routers.counter import router as counter_router
+
+
 from .models import Base
 from .db import engine
 
@@ -21,5 +26,9 @@ app.include_router(user_router)
 app.include_router(protected_user_router)
 app.include_router(auth_router)
 app.include_router(protected_auth_router)
+app.include_router(event_system_router)
+
+
+app.include_router(counter_router)
 
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

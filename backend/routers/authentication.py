@@ -3,19 +3,17 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 from fastapi import Request, HTTPException
-from fastapi.responses import StreamingResponse
+from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
 from fastapi.responses import JSONResponse, HTMLResponse
-from datastar_py.fastapi import DatastarResponse, read_signals, datastar_response
 
 from ..db import get_db
 from ..dto.user import UserRequest
 from ..dto.authentication import UserCredentials
-from ..shared import SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
+from ..shared import EVENT_SUBSCRIPTION_ID, SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
 from ..services.authentication import (
-    AuthService, InvalidLoginCredentialsException, UserCreationException, 
-    UserNotFoundException, InternalServerException, EmailAlreadyRegisteredException,
-    EmailConfirmationValidationException, RequestTimeoutException, RequestDuplicateException
+    AuthService, InvalidLoginCredentialsException, 
+    UserNotFoundException, InternalServerException,
     )
 
 router = APIRouter(prefix="/auth")
@@ -98,7 +96,8 @@ async def sign_user_up(request: Request, user: UserRequest, service: Annotated[A
     # yield SSE.patch_signals({"error": ""})
     # async for event_type, msg in service.sign_up(user):
     #     yield SSE.patch_signals({f"{event_type}Msg": msg})
-    await service.sign_up(user)
+    event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
+    await service.sign_up(event_subscription_id, user)
     return
 
 @router.get("/confirm/{uuid}", response_class=HTMLResponse)

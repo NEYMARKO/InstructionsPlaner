@@ -15,6 +15,9 @@ class AuthRepository():
     def get_user_by_username(self, username: str) -> UserModel | None:
         return self.user_repository.get_user_by_username(username)
 
+    def get_user_by_email(self, email: str) -> UserModel | None:
+        return self.user_repository.get_user_by_email(email)
+
     def get_user_password(self, username: str) -> str | None:
         """
         Retrives password for provided username.

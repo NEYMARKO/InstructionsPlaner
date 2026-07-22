@@ -4,18 +4,19 @@ import smtplib
 import asyncio
 import psycopg2
 import traceback
+from typing import Literal
 from hashlib import sha256
 from email.utils import formatdate
 from sqlalchemy.orm import Session
 from email.mime.text import MIMEText
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
-from typing import AsyncGenerator, Literal
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 
 from ..dto.user import UserRequest
 from ..services.user import UserService
+from ..notifications import event_system as ES
 from ..repositories.authentication import AuthRepository
 from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO, EmailConfirmationBase
 
@@ -57,7 +58,7 @@ class UserNotFoundException(Exception):
 class InternalServerException(Exception):
     pass
 
-def send_confirmation_mail(email, confirmation_uuid: uuid.UUID) -> None:
+def send_confirmation_mail(email: str, confirmation_uuid: uuid.UUID) -> None:
     
     mail_sender = os.getenv("MAIL_SENDER")
     mail_sender_pass = os.getenv("MAIL_SENDER_PASS")
@@ -128,6 +129,9 @@ class AuthService():
 
     def send_confirmation(self, user: UserRequest) -> None:
         confirmation_uuid = uuid.uuid4()
+
+        if self.repository.get_user_by_email(user.email):
+            raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
         
         try:
             self.repository.add_mail_verification_info(EmailConfirmationBase(email=user.email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
@@ -167,33 +171,38 @@ class AuthService():
         return True
 
     # async def sign_up(self, user: UserRequest) -> AsyncGenerator[tuple[EventType, str], None]:
-    async def sign_up(self, user: UserRequest) -> None:
+    async def sign_up(self, event_subscription_id: str, user: UserRequest) -> tuple[str, str]:
         user_saved = False
         try:
             self.send_confirmation(user)
             # yield ("info", f"Mail has been sent to {user.email}, please confirm it.")
+            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
             print(f"Mail has been sent to {user.email}, please confirm it.")
-        except RequestDuplicateException as e:
+        except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
             # yield ("error", str(e))
             print(str(e))
-            return
+            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+            return ("", "")
         try:
             try:
                 if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
                     user_saved = self.save_user(user)
             except asyncio.CancelledError:
                 print("CANCELLED MID WAIT")
-        except (RequestTimeoutException, EmailAlreadyRegisteredException) as e:
+        except RequestTimeoutException as e:
             # yield ("error", str(e))
             print(str(e))
-            return
+            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+            return ("", "")
         except (EmailConfirmationValidationException, UserCreationException):
             # yield ("error", "Something went wrong, please try again.")
+            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
             print("Something went wrong, please try again.")
         if user_saved:
             # yield ("success", "Sucessfully signed up!")
             print("Sucessfully signed up!")
-        return
+            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"})
+        return self.create_session(user.username)
 
     def login(self, user_credentials: UserCredentials) -> LoginResponse:
         """

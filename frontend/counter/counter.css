@@ -1,0 +1,80 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 40px;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 500px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2 {
+    margin-top: 0;
+}
+
+.counter-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.counter-value {
+    font-size: 56px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+}
+
+.increment {
+    background: #28a745;
+}
+
+.decrement {
+    background: #dc3545;
+}
+
+.print {
+    width: 100%;
+    background: #007bff;
+}
+
+.message-section {
+    margin-top: 30px;
+}
+
+.message {
+    min-height: 80px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-left: 4px solid #007bff;
+    border-radius: 8px;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+}
