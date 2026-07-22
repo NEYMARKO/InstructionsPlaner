@@ -91,29 +91,14 @@ def get_sign_up(request: Request):
         request=request, name="registration/register.html"
     )
 
-@router.post("/sign-up", response_class=DatastarResponse)
+# @router.post("/sign-up", response_class=StreamingResponse)
+@router.post("/sign-up")
 # @datastar_response
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]):
-    yield SSE.patch_signals({"error": ""})
-    print(f"[USER_REQUEST SIGN-UP]: {user}")
-    signals = await read_signals(request=request)
-    print(f"[SIGNALS SIGN-UP]: {signals}")
-    
-    try:
-        await service.sign_up(user)
-    except (RequestTimeoutException, RequestDuplicateException, EmailAlreadyRegisteredException) as e:
-        print(f"[EXCEPTION]: {str(e)}")
-        yield SSE.patch_signals({"error": str(e)})
-        return
-    except (EmailConfirmationValidationException, UserCreationException):
-        yield SSE.patch_signals({"error": "Something went wrong. Please try again."})
-        return
-    
-    print(f"{'-'*50}GOT TO THE END{'-'*50}")
-    # yield SSE.patch_elements(
-    #     templates.get_template("login/login.html").render({})
-    # )
-    yield SSE.patch_signals({"error": "Successfully signed up"})
+    # yield SSE.patch_signals({"error": ""})
+    # async for event_type, msg in service.sign_up(user):
+    #     yield SSE.patch_signals({f"{event_type}Msg": msg})
+    await service.sign_up(user)
     return
 
 @router.get("/confirm/{uuid}", response_class=HTMLResponse)

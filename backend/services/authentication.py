@@ -10,12 +10,12 @@ from sqlalchemy.orm import Session
 from email.mime.text import MIMEText
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
+from typing import AsyncGenerator, Literal
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
-from datastar_py import ServerSentEventGenerator as SSE
 
+from ..dto.user import UserRequest
 from ..services.user import UserService
-from ..dto.user import UserRequest, UserResponse
 from ..repositories.authentication import AuthRepository
 from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO, EmailConfirmationBase
 
@@ -26,6 +26,9 @@ TOKEN_REFRESH_LIFETIME_HOURS = 2
 TOKEN_VALIDITY_LIFETIME_DAYS = 2 
 
 CHECK_INTERVAL_SEC = 2
+
+
+EventType = Literal["info", "error", "success"]
 
 class RequestDuplicateException(Exception):
     pass
@@ -110,57 +113,87 @@ class AuthService():
             raise EmailConfirmationValidationException("Email confirmation could not get validated")
         return confirm_obj.activated and (datetime.now(timezone.utc) - confirm_obj.requested_at).total_seconds() < wait_time
 
-    async def loop_check(self, user: UserRequest, wait_time: int, start: datetime) -> None:
+    async def wait_for_confirmation(self, user: UserRequest, wait_time: int) -> bool:
+        start = datetime.now()
+        i = 0
         while(not (confirmed:= self.email_confirmed(user.email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
-                print("CHECKING...")
+                print(f"[CHECKING] Pefrorming check no. {i}...")
                 await asyncio.sleep(CHECK_INTERVAL_SEC)
-        self.repository.delete_mail_verification_info(user.email)
-        if confirmed:
-            try:
-                self.user_service.add_user(user)
-            except ValidationError:
-                raise UserCreationException("Problems with creating user")
-            except psycopg2.errors.UniqueViolation:
-                raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
-        return
+                i += 1
+        self.repository.delete_mail_verification_info(user.email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
+        if not confirmed:
+            raise RequestTimeoutException("Email wasn't confirmed in time")            
+        return True
     
-    async def validate_email(self, user: UserRequest, wait_time: int = 60) -> None:
-        """
-        Sends e-mail with activation link to the provided e-mail address (`email`) and waits
-        `wait_time` seconds for user to confirm. In case `wait_time` is exceeded, exception is
-        thrown.
-        """
+
+    def send_confirmation(self, user: UserRequest) -> None:
         confirmation_uuid = uuid.uuid4()
         
         try:
             self.repository.add_mail_verification_info(EmailConfirmationBase(email=user.email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
         except IntegrityError:
+            self.repository.rollback()
             raise RequestDuplicateException("Request has already been sent for this email address")
         
         send_confirmation_mail(user.email, confirmation_uuid)
-        
-        start = datetime.now()
-
-        asyncio.create_task(self.loop_check(user, wait_time, start))
-        # try:
-            
-        # except asyncio.CancelledError:
-        #     print("CANCELLED mid-wait")
-        #     raise
-        print(f"{'-'*50}FINISHED WHILE LOOP{'-'*50}")
-        # self.repository.delete_mail_verification_info(user.email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
         return
+
+    # async def validate_email(self, user: UserRequest, wait_time: int = 10) -> bool:
+    #     """
+    #     Sends e-mail with activation link to the provided e-mail address (`email`) and waits
+    #     `wait_time` seconds for user to confirm. In case `wait_time` is exceeded, exception is
+    #     thrown.
+    #     """
+    #     validated = False
+        
+        
+    #     asyncio.create_task(self.wait_for_confirmation(user, wait_time)) # if you don't await the task, error that is getting raised in it won't get propagated (it will get swalloved)
+        
+    #     return validated
 
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
         print("MAIL CONFIRMED")
         self.repository.update_mail_verification_info(validation_uuid)
         return "Your confirmation has been registered"
 
+    def save_user(self, user: UserRequest) -> bool:
+        try:
+            self.user_service.add_user(user)
+        except ValidationError:
+            raise UserCreationException("Problems with creating user")
+        except psycopg2.errors.UniqueViolation:
+            self.repository.rollback()
+            raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
+        return True
+
+    # async def sign_up(self, user: UserRequest) -> AsyncGenerator[tuple[EventType, str], None]:
     async def sign_up(self, user: UserRequest) -> None:
-        result = None
-        await self.validate_email(user)
-        SSE.patch_signals({"error": "MAIL POSLAN, NAPRAVI CONFIRMATION"})
-        return result
+        user_saved = False
+        try:
+            self.send_confirmation(user)
+            # yield ("info", f"Mail has been sent to {user.email}, please confirm it.")
+            print(f"Mail has been sent to {user.email}, please confirm it.")
+        except RequestDuplicateException as e:
+            # yield ("error", str(e))
+            print(str(e))
+            return
+        try:
+            try:
+                if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
+                    user_saved = self.save_user(user)
+            except asyncio.CancelledError:
+                print("CANCELLED MID WAIT")
+        except (RequestTimeoutException, EmailAlreadyRegisteredException) as e:
+            # yield ("error", str(e))
+            print(str(e))
+            return
+        except (EmailConfirmationValidationException, UserCreationException):
+            # yield ("error", "Something went wrong, please try again.")
+            print("Something went wrong, please try again.")
+        if user_saved:
+            # yield ("success", "Sucessfully signed up!")
+            print("Sucessfully signed up!")
+        return
 
     def login(self, user_credentials: UserCredentials) -> LoginResponse:
         """

@@ -5,8 +5,6 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import ValidationError
-from sqlalchemy.exc import IntegrityError
 
 class UserRepository():
 
@@ -16,12 +14,9 @@ class UserRepository():
     def save_user(self, new_user: UserRequest) -> UserResponse:
         # IN CASE OF WRITING SQL, write: SELECT * FROM public.user => NOTICE THAT SCHEMA NAME IS SPECIFIED ASWELL
         new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
-        try:
-            self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
-            self.db.commit()
-            self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
-        except IntegrityError:
-            raise ValidationError("Email already exists in db")
+        self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
+        self.db.commit()
+        self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
         return UserResponse.model_validate(new_user_model)
     
     def get_users(self) -> list[UserResponse]:

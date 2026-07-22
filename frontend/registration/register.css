@@ -252,3 +252,65 @@ button:active {
 
     text-align: center;
 }
+
+.success-box {
+    margin-top: 18px;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(46, 125, 50, 0.18);
+    border-left: 4px solid #2e7d32;
+    border-radius: 10px;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(255,255,255,.6),
+            transparent 45%
+        ),
+        linear-gradient(
+            160deg,
+            #f7fdf8,
+            #e7f5ea
+        );
+
+    color: #2e7d32;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-align: center;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.8);
+}
+
+.info-box {
+    margin-top: 18px;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(90, 110, 130, 0.25);
+    border-left: 4px solid #5f6b7a;
+    border-radius: 10px;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(255,255,255,.65),
+            transparent 45%
+        ),
+        linear-gradient(
+            160deg,
+            #fafbfc,
+            #edf1f4
+        );
+
+    color: #4a5563;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-align: center;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.8);
+}
