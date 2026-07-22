@@ -12,8 +12,7 @@ from ..dto.user import UserRequest
 from ..dto.authentication import UserCredentials
 from ..shared import EVENT_SUBSCRIPTION_ID, SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
 from ..services.authentication import (
-    AuthService, InvalidLoginCredentialsException, 
-    UserNotFoundException, InternalServerException,
+    AuthService, InternalServerException
     )
 
 router = APIRouter(prefix="/auth")
@@ -48,21 +47,16 @@ def get_login(request: Request):
     )
 
 @router.post("/login")
-async def login(credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse:
+async def login(request: Request, credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse:
     service_response = None
+    event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
     print(f"[LOGIN] passed credentials: {credentials}")
-    try:
-        service_response = service.login(credentials)
-    except (InvalidLoginCredentialsException, UserNotFoundException) as e:
-        print(f"ERROR OCCURED: {str(e)}")
-        return DatastarResponse([
-            SSE.patch_signals({"error": str(e)})
-        ])
-    except InternalServerException as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+    service_response = service.login(event_subscription_id, credentials)
+    if not service_response:
+        return DatastarResponse() # don't patch anything because that will overwrite original error msg
+
     response = DatastarResponse(
-        SSE.patch_signals({"error": ""})
+        SSE.patch_signals({"error": ""}) # delete error msg in case user has successfully logged in
     )
     response.set_cookie(
         key=SESSION_TOKEN_STR,

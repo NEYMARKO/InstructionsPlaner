@@ -175,12 +175,8 @@ class AuthService():
         user_saved = False
         try:
             self.send_confirmation(user)
-            # yield ("info", f"Mail has been sent to {user.email}, please confirm it.")
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
-            print(f"Mail has been sent to {user.email}, please confirm it.")
         except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
-            # yield ("error", str(e))
-            print(str(e))
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
             return ("", "")
         try:
@@ -190,39 +186,38 @@ class AuthService():
             except asyncio.CancelledError:
                 print("CANCELLED MID WAIT")
         except RequestTimeoutException as e:
-            # yield ("error", str(e))
-            print(str(e))
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
             return ("", "")
         except (EmailConfirmationValidationException, UserCreationException):
-            # yield ("error", "Something went wrong, please try again.")
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
-            print("Something went wrong, please try again.")
         if user_saved:
-            # yield ("success", "Sucessfully signed up!")
-            print("Sucessfully signed up!")
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"})
         return self.create_session(user.username)
 
-    def login(self, user_credentials: UserCredentials) -> LoginResponse:
+    def login(self, event_subscription_id: str, user_credentials: UserCredentials) -> LoginResponse | None:
         """
         Checks whether user with these particular credentials exists. In case user has logged with
         valid credentials, session is created and session id is passed through cookies in response.    
         """
-        password = ""
-        try:
-            password = self.repository.get_user_password(user_credentials.username)
-        except ValueError:
-            raise InvalidLoginCredentialsException("Invalid login credentials")
+        token = ""
+        user_uuid = ""
+
+        password = self.repository.get_user_password(user_credentials.username)
         
         if user_credentials.password != password:
-            raise InvalidLoginCredentialsException("Invalid login credentials")
+            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
+            return None
         
         # Save session to db to compare it during every access to restriced endpoint
-        user_uuid, token = self.create_session(user_credentials.username)
+        try:
+            user_uuid, token = self.create_session(user_credentials.username)
+        except UserNotFoundException:
+            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
+            return None
 
         if not user_uuid or not token:
-            raise 
+            ES.add_notification_to_queue(event_subscription_id, {"error": "Something went wrong, please try again."})
+            return None
         return LoginResponse(message="Successfully logged in", user_uuid_str=user_uuid, token=token)
 
     def token_expired(self, valid_until: datetime | None) -> bool:

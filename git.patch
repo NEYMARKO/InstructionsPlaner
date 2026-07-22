@@ -1,80 +1,71 @@
 diff --git a/backend/services/authentication.py b/backend/services/authentication.py
-index 5668373..153bef2 100644
+index 2965bf0..c49075d 100644
 --- a/backend/services/authentication.py
 +++ b/backend/services/authentication.py
-@@ -1,4 +1,5 @@
- import uuid
-+import psycopg2
- from hashlib import sha256
- from sqlalchemy.orm import Session
- from datetime import datetime, timedelta
-@@ -7,11 +8,14 @@ from fastapi import HTTPException, Request
+@@ -175,12 +175,8 @@ class AuthService():
+         user_saved = False
+         try:
+             self.send_confirmation(user)
+-            # yield ("info", f"Mail has been sent to {user.email}, please confirm it.")
+             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
+-            print(f"Mail has been sent to {user.email}, please confirm it.")
+         except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
+-            # yield ("error", str(e))
+-            print(str(e))
+             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+             return ("", "")
+         try:
+@@ -190,39 +186,38 @@ class AuthService():
+             except asyncio.CancelledError:
+                 print("CANCELLED MID WAIT")
+         except RequestTimeoutException as e:
+-            # yield ("error", str(e))
+-            print(str(e))
+             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+             return ("", "")
+         except (EmailConfirmationValidationException, UserCreationException):
+-            # yield ("error", "Something went wrong, please try again.")
+             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
+-            print("Something went wrong, please try again.")
+         if user_saved:
+-            # yield ("success", "Sucessfully signed up!")
+-            print("Sucessfully signed up!")
+             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"})
+         return self.create_session(user.username)
  
- from ..shared import SESSION_USER_UUID_STR
- from ..repositories.authentication import AuthRepository
--from ..dto.authentication import UserCredentials, LoginResponse, Session as SessionDTO
-+from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO
- 
- def generate_token() -> str:
-     return sha256(str(uuid.uuid4()).encode('utf-8')).hexdigest()
- 
-+TOKEN_REFRESH_LIFETIME_HOURS = 2
-+TOKEN_VALIDITY_LIFETIME_DAYS = 2 
+-    def login(self, user_credentials: UserCredentials) -> LoginResponse:
++    def login(self, event_subscription_id: str, user_credentials: UserCredentials) -> LoginResponse | None:
+         """
+         Checks whether user with these particular credentials exists. In case user has logged with
+         valid credentials, session is created and session id is passed through cookies in response.    
+         """
+-        password = ""
+-        try:
+-            password = self.repository.get_user_password(user_credentials.username)
+-        except ValueError:
+-            raise InvalidLoginCredentialsException("Invalid login credentials")
++        token = ""
++        user_uuid = ""
 +
- class AuthService():
-     def __init__(self, db: Session) -> None:
-         self.repository = AuthRepository(db)
-@@ -32,6 +36,7 @@ class AuthService():
-             raise HTTPException(status_code=401, detail="Invalid login credentials")
++        password = self.repository.get_user_password(user_credentials.username)
          
-         user_uuid, token = self.create_session(user_credentials.username)
-+
+         if user_credentials.password != password:
+-            raise InvalidLoginCredentialsException("Invalid login credentials")
++            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
++            return None
+         
          # Save session to db to compare it during every access to restriced endpoint
+-        user_uuid, token = self.create_session(user_credentials.username)
++        try:
++            user_uuid, token = self.create_session(user_credentials.username)
++        except UserNotFoundException:
++            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
++            return None
+ 
+         if not user_uuid or not token:
+-            raise 
++            ES.add_notification_to_queue(event_subscription_id, {"error": "Something went wrong, please try again."})
++            return None
          return LoginResponse(message="Successfully logged in", user_uuid_str=user_uuid, token=token)
  
-@@ -40,11 +45,27 @@ class AuthService():
-         user_uuid = self.repository.get_user_uuid(username)
-         if not user_uuid:
-             raise HTTPException(status_code=404, detail="Unable to find user with given username")
--        self.repository.create_session(SessionDTO(
--            user_uuid=user_uuid, token=token,
--            refreshes_at=datetime.now() + timedelta(hours=2),
--            valid_until=datetime.now() + timedelta(days=2)
--        ))
-+
-+        session = self.repository.get_session(user_uuid)
-+        if session: # if session shouldn't be refreshed yet, return result
-+            if session.refreshes_at < datetime.now():
-+                print("[SESSION]: Token already exists, refreshing it")
-+                return (user_uuid, session.token)
-+            elif session.valid_until and session.valid_until > datetime.now():
-+                self.repository.delete_session(user_uuid)
-+                return ("", "")
-+        try:
-+            self.repository.create_session(
-+                SessionDTO(
-+                user_uuid=user_uuid, token=token,
-+                refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS),
-+                valid_until=datetime.now() + timedelta(days=TOKEN_VALIDITY_LIFETIME_DAYS)
-+                )
-+            )
-+        
-+        except psycopg2.errors.UniqueViolation: # tried to adding session for same user
-+            return ("", "")
-+        
-         return (user_uuid, token)
-     
-     def refresh_token(self, request: Request) -> None:
-@@ -53,6 +74,10 @@ class AuthService():
-         self.repository.refresh_token(SessionDTO(
-             user_uuid=user_uuid,
-             token=generate_token(),
--            refreshes_at=datetime.now() + timedelta(hours=2)
-+            refreshes_at=datetime.now() + timedelta(hours=TOKEN_REFRESH_LIFETIME_HOURS)
-         ))
-+        return
-+    
-+    def logout(self, user_uuid: str) -> None:
-+        self.repository.delete_session(user_uuid)
-         return
-\ No newline at end of file
+     def token_expired(self, valid_until: datetime | None) -> bool:
