@@ -25,7 +25,10 @@
         </nav>
 
         <div class="nav-actions">
-            <button class="notification-btn" data-on:click="$_showNotifs = !$_showNotifs">
+            <button class="notification-btn" data-on:click="
+            $_showNotifs = !$_showNotifs;
+            $_showNotifs && @get('/notifications')
+            ">
                 🔔
                 <span class="badge">3</span>
             </button>
@@ -217,8 +220,13 @@
                 Notifications
             </div>
 
-
-            <div class="notification">
+            {% for notif in notifications %}
+                <!-- {{ notif.message }} -->
+                {% with notification=notif %}
+                    {% include 'home/notification.html' %}
+                {% endwith %}
+            {% endfor %}
+            <!-- <div class="notification">
                 Your instructor confirmed tomorrow's lesson.
             </div>
 
@@ -230,7 +238,7 @@
 
             <div class="notification">
                 Programming lesson starts in 2 hours.
-            </div>
+            </div> -->
 
         </aside>
 

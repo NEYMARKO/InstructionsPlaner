@@ -21,3 +21,23 @@ def get_home(request: Request, auth_service: Annotated[AuthService, Depends(get_
     return templates.TemplateResponse(
         request=request, name="home/home.html", context={"user_id": user_id, "authenticated": authenticated}
     )
+@router.get("/notifications", response_class=HTMLResponse)
+def get_notifications(request: Request):
+    print("USER REQUESTED NOTIFICATIONS")
+    notifications = [
+        {
+            "message": "Don't forget to eat your vegetables" 
+        },
+        {
+            "message": "Training starting at 4 o'clock"
+        },
+        {
+            "message": "I'm in love with a cocoa"
+        },
+        {
+            "message": "Can't stop lifting"
+        }
+    ]
+    return templates.TemplateResponse(
+        request=request, name="home/home.html", context={"notifications": notifications}
+    )
