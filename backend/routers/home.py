@@ -19,5 +19,5 @@ def get_home(request: Request, auth_service: Annotated[AuthService, Depends(get_
     except HTTPException:
         pass
     return templates.TemplateResponse(
-        request=request, name="index/index.html", context={"user_id": user_id, "authenticated": authenticated}
+        request=request, name="home/home.html", context={"user_id": user_id, "authenticated": authenticated}
     )

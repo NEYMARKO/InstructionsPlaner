@@ -1,11 +1,13 @@
-from uuid import UUID
-from sqlalchemy.orm import Session
 from datetime import datetime, timezone
-from sqlalchemy import update, select, delete
+from uuid import UUID
 
+from sqlalchemy import delete, select, update
+from sqlalchemy.orm import Session
+
+from ..dto.authentication import EmailConfirmationBase, SessionDTO
+from ..models import EmailConfirmation, SessionModel, UserModel
 from .user import UserRepository
-from ..models import SessionModel, UserModel, EmailConfirmation
-from ..dto.authentication import SessionDTO, EmailConfirmationBase
+
 
 class AuthRepository():
     def __init__(self, db: Session) -> None:
@@ -38,15 +40,11 @@ class AuthRepository():
         )
         self.db.execute(query)
         self.db.commit()
-        return
     
     def add_mail_verification_info(self, e_obj: EmailConfirmationBase) -> None:
         email_conf_model = EmailConfirmation(email=e_obj.email, sent_uuid=e_obj.sent_uuid, activated=e_obj.activated, requested_at=e_obj.requested_at)
         self.db.add(email_conf_model)
         self.db.commit()
-        print("DODAO MAIL ADRESU")
-        return
-
 
     def get_mail_verification_info(self, email: str) -> EmailConfirmationBase:
         result = self.db.query(EmailConfirmation).get(email) # SELECT (read) does not need commit() - only INSERT, UPDATE and DELETE require it
@@ -57,12 +55,10 @@ class AuthRepository():
             filter(EmailConfirmation.sent_uuid == uuid).\
                 update({"activated": True})
         self.db.commit()
-        return
 
     def delete_mail_verification_info(self, email: str) -> None:
         self.db.query(EmailConfirmation).filter(EmailConfirmation.email == email).delete()
         self.db.commit()
-        return
 
     def create_session(
             self, token: str, refreshes_at: datetime, 
@@ -76,7 +72,6 @@ class AuthRepository():
         )
         self.db.add(session_model)
         self.db.commit()
-        return
 
     def refresh_token(self, session_info: SessionDTO) -> None:
         query = update(SessionModel)\
@@ -87,7 +82,6 @@ class AuthRepository():
                 )
         self.db.execute(query)
         self.db.commit()
-        return
     
     def get_session(self, user_uuid: UUID, token: str) -> SessionDTO | None:
         query = select(SessionModel).where(
@@ -102,8 +96,6 @@ class AuthRepository():
             delete(SessionModel).where(SessionModel.valid_until < datetime.now(timezone.utc))
         )
         self.db.commit()
-        return
 
     def rollback(self) -> None:
         self.db.rollback()
-        return

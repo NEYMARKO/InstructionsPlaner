@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruction Planner</title>
+
+    <link href="{{ url_for('frontend', path='home/home.css') }}" rel="stylesheet">
+
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
+</head>
+
+<body data-signals="{_showNotifs:false}">
+
+    <header class="navbar">
+        <div class="logo">
+            📚 Instruction Planner
+        </div>
+
+        <nav>
+            <a href="/profile">Profile</a>
+            <a href="/instructions/history">Past Instructions</a>
+            <a href="/statistics">Statistics</a>
+        </nav>
+
+        <div class="nav-actions">
+            <button class="notification-btn" data-on:click="$_showNotifs = !$_showNotifs">
+                🔔
+                <span class="badge">3</span>
+            </button>
+
+            <img class="avatar" src="https://placehold.co/40" alt="Profile">
+        </div>
+    </header>
+
+
+    <div class="app-layout" data-class-notifications-open="$_showNotifs">
+
+        <div class="content">
+
+            <div class="container">
+
+                <main>
+
+                    <section class="calendar">
+
+                        <div class="section-title">
+                            Weekly Schedule
+                        </div>
+
+                        <div class="week-grid">
+
+                            <div class="day">
+                                <h4>Mon</h4>
+
+                                <div class="event">
+                                    Math
+                                    <small>10:00 - 11:30</small>
+                                </div>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Tue</h4>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Wed</h4>
+
+                                <div class="event">
+                                    Physics
+                                    <small>15:00 - 16:30</small>
+                                </div>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Thu</h4>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Fri</h4>
+
+                                <div class="event">
+                                    Programming
+                                    <small>09:00 - 10:30</small>
+                                </div>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Sat</h4>
+                            </div>
+
+
+                            <div class="day">
+                                <h4>Sun</h4>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section>
+
+                        <div class="section-title">
+                            Upcoming Instructions
+                        </div>
+
+
+                        <div class="cards">
+
+                            <div class="instruction-card">
+
+                                <div class="status confirmed">
+                                    Confirmed
+                                </div>
+
+                                <h3>Mathematics</h3>
+
+                                <p><strong>Instructor:</strong> John Smith</p>
+                                <p><strong>Date:</strong> Monday</p>
+                                <p><strong>Time:</strong> 10:00 - 11:30</p>
+
+                                <div class="buttons">
+                                    <button class="primary">
+                                        Confirm Attendance
+                                    </button>
+
+                                    <button class="secondary">
+                                        Cancel
+                                    </button>
+                                </div>
+
+                            </div>
+
+
+                            <div class="instruction-card">
+
+                                <div class="status pending">
+                                    Waiting
+                                </div>
+
+                                <h3>Physics</h3>
+
+                                <p><strong>Instructor:</strong> Emily Johnson</p>
+                                <p><strong>Date:</strong> Wednesday</p>
+                                <p><strong>Time:</strong> 15:00 - 16:30</p>
+
+                                <div class="buttons">
+                                    <button class="primary">
+                                        Confirm Attendance
+                                    </button>
+
+                                    <button class="secondary">
+                                        Cancel
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </main>
+
+
+                <aside>
+
+                    <section class="stats">
+
+                        <div class="section-title">
+                            Statistics
+                        </div>
+
+
+                        <div class="stat">
+                            <span>Attendances</span>
+                            <strong>28</strong>
+                        </div>
+
+
+                        <div class="stat">
+                            <span>Student Cancellations</span>
+                            <strong>2</strong>
+                        </div>
+
+
+                        <div class="stat">
+                            <span>Instructor Cancellations</span>
+                            <strong>1</strong>
+                        </div>
+
+
+                        <div class="stat">
+                            <span>Average Satisfaction</span>
+                            <strong>4.8 / 5</strong>
+                        </div>
+
+                    </section>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+
+        <aside class="notification-panel" data-class:open="$_showNotifs">
+
+            <div class="notification-header">
+                Notifications
+            </div>
+
+
+            <div class="notification">
+                Your instructor confirmed tomorrow's lesson.
+            </div>
+
+
+            <div class="notification">
+                Don't forget to rate yesterday's instruction.
+            </div>
+
+
+            <div class="notification">
+                Programming lesson starts in 2 hours.
+            </div>
+
+        </aside>
+
+    </div>
+
+</body>
+
+</html>
