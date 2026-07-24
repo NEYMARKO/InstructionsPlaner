@@ -116,56 +116,12 @@
 
 
                         <div class="cards">
-
-                            <div class="instruction-card">
-
-                                <div class="status confirmed">
-                                    Confirmed
-                                </div>
-
-                                <h3>Mathematics</h3>
-
-                                <p><strong>Instructor:</strong> John Smith</p>
-                                <p><strong>Date:</strong> Monday</p>
-                                <p><strong>Time:</strong> 10:00 - 11:30</p>
-
-                                <div class="buttons">
-                                    <button class="primary">
-                                        Confirm Attendance
-                                    </button>
-
-                                    <button class="secondary">
-                                        Cancel
-                                    </button>
-                                </div>
-
-                            </div>
-
-
-                            <div class="instruction-card">
-
-                                <div class="status pending">
-                                    Waiting
-                                </div>
-
-                                <h3>Physics</h3>
-
-                                <p><strong>Instructor:</strong> Emily Johnson</p>
-                                <p><strong>Date:</strong> Wednesday</p>
-                                <p><strong>Time:</strong> 15:00 - 16:30</p>
-
-                                <div class="buttons">
-                                    <button class="primary">
-                                        Confirm Attendance
-                                    </button>
-
-                                    <button class="secondary">
-                                        Cancel
-                                    </button>
-                                </div>
-
-                            </div>
-
+                            
+                            {% for instr in instructions %}
+                                {% with training=instr %}
+                                    {% include 'home/practice.html' %}
+                                {% endwith %}
+                            {% endfor %}
                         </div>
 
                     </section>
@@ -221,24 +177,10 @@
             </div>
 
             {% for notif in notifications %}
-                <!-- {{ notif.message }} -->
                 {% with notification=notif %}
                     {% include 'home/notification.html' %}
                 {% endwith %}
             {% endfor %}
-            <!-- <div class="notification">
-                Your instructor confirmed tomorrow's lesson.
-            </div>
-
-
-            <div class="notification">
-                Don't forget to rate yesterday's instruction.
-            </div>
-
-
-            <div class="notification">
-                Programming lesson starts in 2 hours.
-            </div> -->
 
         </aside>
 

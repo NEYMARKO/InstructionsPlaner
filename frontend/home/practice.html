@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('frontend', path='home/practice.css') }}" rel="stylesheet">
+</head>
+<div class="instruction-card">
+
+    <!-- <div class="status " {{ training.status}}> -->
+    <div class="status {{ training.status }}">
+        {{ training.status.upper() }}
+    </div>
+
+    <h3>{{ training.title }}</h3>
+
+    <p><strong>Instructor:</strong> {{ training.instructor }} </p>
+    <p><strong>Date:</strong> {{ training.date }} </p>
+    <p><strong>Time:</strong> {{ training.time }}</p>
+
+    <div class="buttons">
+        <button class="primary">
+            Confirm Attendance
+        </button>
+
+        <button class="secondary">
+            Cancel
+        </button>
+    </div>
+</div>

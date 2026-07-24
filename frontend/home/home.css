@@ -171,61 +171,8 @@ nav a:hover {
     gap: 20px;
 }
 
-.instruction-card {
-    background: #fff;
-    border-radius: 18px;
-    padding: 25px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.instruction-card h3 {
-    margin: 15px 0;
-}
-
-.instruction-card p {
-    margin: 8px 0;
-    color: #666;
-}
-
-.status {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    color: #fff;
-    font-size: 13px;
-}
-
-.confirmed {
-    background: #22c55e;
-}
-
 .pending {
     background: #f59e0b;
-}
-
-.buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.primary {
-    flex: 1;
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.secondary {
-    flex: 1;
-    background: #ececec;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
 }
 
 
