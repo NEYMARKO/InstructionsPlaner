@@ -1,6 +1,6 @@
 from uuid import UUID
-from typing import Annotated
 from sqlalchemy.orm import Session
+from typing import Annotated, Literal
 from fastapi import APIRouter, Depends
 from fastapi import Request, HTTPException
 from datastar_py.fastapi import DatastarResponse
@@ -38,6 +38,25 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
         raise HTTPException(status_code=500, detail=str(e))
     return True
 
+def construct_cookie_response(
+        response: DatastarResponse | None,
+        key: str, value: str, is_secure: bool = True, 
+        http_only: bool = True, samesite: Literal['lax', 'strict', 'none'] | None = 'lax', max_age: int = 3600
+    ) -> DatastarResponse:
+
+    print(f"Constructing cookie for key: {key}")
+    if not response:
+        response = DatastarResponse()
+    response.set_cookie(
+        key=key,
+        value=value,
+        httponly=http_only,
+        secure=is_secure,
+        samesite=samesite,
+        max_age=max_age
+    )
+    return response
+
 protected_router = APIRouter(prefix="/auth", dependencies=[Depends(is_authenticated)])
 
 @router.get("/login", response_class=HTMLResponse)
@@ -58,23 +77,25 @@ async def login(request: Request, credentials: UserCredentials, service: Annotat
     response = DatastarResponse(
         SSE.patch_signals({"error": ""}) # delete error msg in case user has successfully logged in
     )
-    response.set_cookie(
-        key=SESSION_TOKEN_STR,
-        value=service_response.token,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=3600
-    )
+    response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
+    response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_uuid_str)
+    # response.set_cookie(
+    #     key=SESSION_TOKEN_STR,
+    #     value=service_response.token,
+    #     httponly=True,
+    #     secure=True,
+    #     samesite="lax",
+    #     max_age=3600
+    # )
 
-    response.set_cookie(
-        key=SESSION_USER_UUID_STR,
-        value=service_response.user_uuid_str,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=3600
-    )
+    # response.set_cookie(
+    #     key=SESSION_USER_UUID_STR,
+    #     value=service_response.user_uuid_str,
+    #     httponly=True,
+    #     secure=True,
+    #     samesite="lax",
+    #     max_age=3600
+    # )
     return response
 
 @router.get("/sign-up", response_class=HTMLResponse)
@@ -84,14 +105,18 @@ def get_sign_up(request: Request):
     )
 
 # @router.post("/sign-up", response_class=StreamingResponse)
-@router.post("/sign-up")
+@router.post("/sign-up", response_model=None)
 # @datastar_response
-async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]):
+async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse | None:
     # yield SSE.patch_signals({"error": ""})
     # async for event_type, msg in service.sign_up(user):
     #     yield SSE.patch_signals({f"{event_type}Msg": msg})
     event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
-    await service.sign_up(event_subscription_id, user)
+    service_response = await service.sign_up(event_subscription_id, user)
+    if service_response:
+        response = construct_cookie_response(None, SESSION_TOKEN_STR, service_response.token)
+        response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_id)
+        return response
     return
 
 @router.get("/confirm/{uuid}", response_class=HTMLResponse)

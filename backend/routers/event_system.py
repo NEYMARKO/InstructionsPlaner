@@ -1,12 +1,13 @@
-import uuid
 import asyncio
-from fastapi import Request
-from fastapi.routing import APIRouter
-from fastapi.responses import StreamingResponse
-from datastar_py import ServerSentEventGenerator as SSE
+import uuid
 
-from ..shared import EVENT_SUBSCRIPTION_ID
+from datastar_py import ServerSentEventGenerator as SSE
+from fastapi import Request
+from fastapi.responses import StreamingResponse
+from fastapi.routing import APIRouter
+
 from ..notifications import event_system as ES
+from ..shared import EVENT_SUBSCRIPTION_ID
 
 router = APIRouter(prefix="/event-system")
 

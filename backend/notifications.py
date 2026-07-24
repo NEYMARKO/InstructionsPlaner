@@ -51,28 +51,32 @@ class SingletonMeta(type):
 class EventSystem(metaclass=SingletonMeta):
     _notification_queue: dict[str, list[dict[str, str]]] = {}
     
-    def subscribe_session(self, session_id: str, notifications: list[dict[str, str]] = []) -> None:
-        if session_id not in self._notification_queue:
-            self._notification_queue[session_id] = notifications
+    def subscribe_session(self, subscription_id: str, notifications: list[dict[str, str]] = []) -> None:
+        if subscription_id not in self._notification_queue:
+            self._notification_queue[subscription_id] = notifications
         return
     
-    def add_notification_to_queue(self, session_id: str, notification: dict[str, str]) -> None:
-        self._notification_queue[session_id].append(notification)
+    def add_notification_to_queue(self, subscription_id: str, notification: dict[str, str]) -> None:
+        if not self._notification_queue.get(subscription_id):
+            self.subscribe_session(subscription_id, [notification])
+        self._notification_queue[subscription_id].append(notification)
         return
     
-    async def get_session_notifications(self, session_id: str) -> list[dict[str, str]]:
-        return self._notification_queue.get(session_id, [])
+    async def get_session_notifications(self, subscription_id: str) -> list[dict[str, str]]:
+        return self._notification_queue.get(subscription_id, [])
     
-    def unsubscribe_session(self, session_id: str) -> None:
-        self._notification_queue.pop(session_id, None)
+    def unsubscribe_session(self, subscription_id: str) -> None:
+        self._notification_queue.pop(subscription_id, None)
         return
 
-    def consume_notifications(self, session_id: str, processed_notifications: list[dict[str, str]]) -> None:
-        session_notifications = self._notification_queue.get(session_id, [])
+    def consume_notifications(self, subscription_id: str, processed_notifications: list[dict[str, str]]) -> None:
+        session_notifications = self._notification_queue.get(subscription_id, [])
         for notif in processed_notifications:
             if notif in session_notifications:
                 session_notifications.remove(notif)
-        self._notification_queue[session_id] = session_notifications
+            # if TERMINATE_SIGNAL_NAME in notif:
+            #     raise CloseStreamException("Close stream")
+        self._notification_queue[subscription_id] = session_notifications
         return
 
     def combine_signals(self, notifications: list[dict[str, str]]) -> dict[str, SignalValue]:

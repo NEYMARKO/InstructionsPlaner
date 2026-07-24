@@ -1,24 +1,32 @@
-import os
-import uuid
-import smtplib
 import asyncio
-import psycopg2
+import os
+import smtplib
 import traceback
-from typing import Literal
-from hashlib import sha256
-from email.utils import formatdate
-from sqlalchemy.orm import Session
+import uuid
+from datetime import datetime, timedelta, timezone
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formatdate
+from hashlib import sha256
+from typing import Literal
+
+import psycopg2
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
-from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta, timezone
+from sqlalchemy.orm import Session
 
+from ..dto.authentication import (
+    EmailConfirmationBase,
+    SignUpResponse,
+    LoginResponse,
+    SessionDTO,
+    UserCredentials,
+)
 from ..dto.user import UserRequest
-from ..services.user import UserService
 from ..notifications import event_system as ES
 from ..repositories.authentication import AuthRepository
-from ..dto.authentication import UserCredentials, LoginResponse, SessionDTO, EmailConfirmationBase
+from ..services.user import UserService
+
 
 def generate_token() -> str:
     return sha256(str(uuid.uuid4()).encode('utf-8')).hexdigest()
@@ -142,19 +150,6 @@ class AuthService():
         send_confirmation_mail(user.email, confirmation_uuid)
         return
 
-    # async def validate_email(self, user: UserRequest, wait_time: int = 10) -> bool:
-    #     """
-    #     Sends e-mail with activation link to the provided e-mail address (`email`) and waits
-    #     `wait_time` seconds for user to confirm. In case `wait_time` is exceeded, exception is
-    #     thrown.
-    #     """
-    #     validated = False
-        
-        
-    #     asyncio.create_task(self.wait_for_confirmation(user, wait_time)) # if you don't await the task, error that is getting raised in it won't get propagated (it will get swalloved)
-        
-    #     return validated
-
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
         print("MAIL CONFIRMED")
         self.repository.update_mail_verification_info(validation_uuid)
@@ -171,14 +166,14 @@ class AuthService():
         return True
 
     # async def sign_up(self, user: UserRequest) -> AsyncGenerator[tuple[EventType, str], None]:
-    async def sign_up(self, event_subscription_id: str, user: UserRequest) -> tuple[str, str]:
+    async def sign_up(self, event_subscription_id: str, user: UserRequest) -> SignUpResponse | None:
         user_saved = False
         try:
             self.send_confirmation(user)
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
         except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
-            return ("", "")
+            return
         try:
             try:
                 if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
@@ -187,12 +182,13 @@ class AuthService():
                 print("CANCELLED MID WAIT")
         except RequestTimeoutException as e:
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
-            return ("", "")
+            return
         except (EmailConfirmationValidationException, UserCreationException):
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
         if user_saved:
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"})
-        return self.create_session(user.username)
+        user_id, token = self.create_session(user.username)
+        return SignUpResponse(token=token, user_id=user_id)
 
     def login(self, event_subscription_id: str, user_credentials: UserCredentials) -> LoginResponse | None:
         """

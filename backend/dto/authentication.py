@@ -3,6 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
+class SignUpResponse(BaseModel):
+    token: str
+    user_id: str
+
 class LoginResponse(BaseModel):
     message: str
     token: str
