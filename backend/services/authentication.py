@@ -214,6 +214,7 @@ class AuthService():
         if not user_uuid or not token:
             ES.add_notification_to_queue(event_subscription_id, {"error": "Something went wrong, please try again."})
             return None
+        ES.add_notification_to_queue(event_subscription_id, {"error": ""}) # delete error msg in case user has successfully logged in
         return LoginResponse(message="Successfully logged in", user_uuid_str=user_uuid, token=token)
 
     def token_expired(self, valid_until: datetime | None) -> bool:

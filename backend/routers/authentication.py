@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from fastapi import Request, HTTPException
 from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 
 from ..db import get_db
 from ..dto.user import UserRequest
@@ -17,10 +17,13 @@ from ..services.authentication import (
 
 router = APIRouter(prefix="/auth")
 
+class NotAuthenticatedException(Exception):
+    pass
+
 def get_service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
     return AuthService(db)
 
-def is_authenticated(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> bool:
+def is_authenticated(request: Request, service: Annotated[AuthService, Depends(get_service)]):
     """
     Checks whether user is authenticated by getting user's `session_id` stored in cookie.
     It then retrives session information for that id from the database and checks whether it has expired.
@@ -28,14 +31,17 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
     """
     token = request.cookies.get(SESSION_TOKEN_STR)
     if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated - token missing")
+        # raise HTTPException(status_code=401, detail="Not authenticated - token missing")
+        raise NotAuthenticatedException()
     try:
         user_id: str = request.cookies.get(SESSION_USER_UUID_STR, "")
         token = request.cookies.get(SESSION_TOKEN_STR, "")
         if not service.token_valid(user_id=user_id, token=token):
-            raise HTTPException(status_code=401, detail="Not authenticated - session doesn't exist")
+            # raise HTTPException(status_code=401, detail="Not authenticated - session doesn't exist")
+            raise NotAuthenticatedException()
     except InternalServerException as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # raise HTTPException(status_code=500, detail=str(e))
+        raise NotAuthenticatedException
     return True
 
 def construct_cookie_response(
@@ -74,9 +80,10 @@ async def login(request: Request, credentials: UserCredentials, service: Annotat
     if not service_response:
         return DatastarResponse() # don't patch anything because that will overwrite original error msg
 
-    response = DatastarResponse(
-        SSE.patch_signals({"error": ""}) # delete error msg in case user has successfully logged in
-    )
+    # response = DatastarResponse(
+    #     SSE.patch_signals({"error": ""}) # delete error msg in case user has successfully logged in
+    # )
+    response = DatastarResponse()
     response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
     response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_uuid_str)
     return response
