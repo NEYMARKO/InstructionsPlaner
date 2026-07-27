@@ -39,7 +39,7 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
         if not service.token_valid(user_id=user_id, token=token):
             # raise HTTPException(status_code=401, detail="Not authenticated - session doesn't exist")
             raise NotAuthenticatedException()
-    except InternalServerException as e:
+    except InternalServerException:
         # raise HTTPException(status_code=500, detail=str(e))
         raise NotAuthenticatedException
     return True
@@ -99,7 +99,8 @@ async def sign_user_up(request: Request, user: UserRequest, service: Annotated[A
     event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
     service_response = await service.sign_up(event_subscription_id, user)
     if service_response:
-        response = construct_cookie_response(None, SESSION_TOKEN_STR, service_response.token)
+        response = DatastarResponse(SSE.execute_script("window.location='/'"))
+        response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
         response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_id)
         return response
     return

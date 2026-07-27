@@ -125,7 +125,11 @@ class AuthService():
     async def wait_for_confirmation(self, user: UserRequest, wait_time: int) -> bool:
         start = datetime.now()
         i = 0
-        while(not (confirmed:= self.email_confirmed(user.email, wait_time)) and (datetime.now() - start).total_seconds() <= wait_time):
+        while(
+            not (confirmed:= self.email_confirmed(user.email, wait_time)) 
+            and (datetime.now() - start).total_seconds() <= wait_time):
+                if ES.should_shutdown():
+                    break
                 print(f"[CHECKING] Pefrorming check no. {i}...")
                 await asyncio.sleep(CHECK_INTERVAL_SEC)
                 i += 1
@@ -146,8 +150,10 @@ class AuthService():
         except IntegrityError:
             self.repository.rollback()
             raise RequestDuplicateException("Request has already been sent for this email address")
-        
-        send_confirmation_mail(user.email, confirmation_uuid)
+
+        print("[SENDING_MAIL...]")
+        send_confirmation_mail(user.email, confirmation_uuid) # this is the bottleneck of the process - takes a long time to get sent
+        print("[MAIL_SENT...]")
         return
 
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
