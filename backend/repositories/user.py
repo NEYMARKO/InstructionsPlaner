@@ -18,6 +18,10 @@ class UserRepository():
         self.db.commit()
         self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
         return UserResponse.model_validate(new_user_model)
+
+    def get_user(self, user_id: str) -> UserResponse:
+        query = select(UserModel).where(UserModel.id==user_id)
+        return self.db.execute(query).scalar_one_or_none()
     
     def get_users(self) -> list[UserResponse]:
         result = self.db.execute(text("SELECT * FROM public.user"))

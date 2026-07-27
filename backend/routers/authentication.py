@@ -2,10 +2,10 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from typing import Annotated, Literal
 from fastapi import APIRouter, Depends
-from fastapi import Request, HTTPException
+from fastapi import Request
 from datastar_py.fastapi import DatastarResponse
 from datastar_py import ServerSentEventGenerator as SSE
-from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 
 from ..db import get_db
 from ..dto.user import UserRequest
@@ -31,16 +31,14 @@ def is_authenticated(request: Request, service: Annotated[AuthService, Depends(g
     """
     token = request.cookies.get(SESSION_TOKEN_STR)
     if not token:
-        # raise HTTPException(status_code=401, detail="Not authenticated - token missing")
         raise NotAuthenticatedException()
     try:
         user_id: str = request.cookies.get(SESSION_USER_UUID_STR, "")
         token = request.cookies.get(SESSION_TOKEN_STR, "")
         if not service.token_valid(user_id=user_id, token=token):
-            # raise HTTPException(status_code=401, detail="Not authenticated - session doesn't exist")
+            print("COULDN'T LOCATE TOKEN FOR USER")
             raise NotAuthenticatedException()
     except InternalServerException:
-        # raise HTTPException(status_code=500, detail=str(e))
         raise NotAuthenticatedException
     return True
 
@@ -79,11 +77,7 @@ async def login(request: Request, credentials: UserCredentials, service: Annotat
     service_response = service.login(event_subscription_id, credentials)
     if not service_response:
         return DatastarResponse() # don't patch anything because that will overwrite original error msg
-
-    # response = DatastarResponse(
-    #     SSE.patch_signals({"error": ""}) # delete error msg in case user has successfully logged in
-    # )
-    response = DatastarResponse()
+    response = DatastarResponse(SSE.execute_script("window.location='/'"))
     response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
     response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_uuid_str)
     return response
@@ -113,13 +107,13 @@ async def confirm_email(uuid: UUID, request: Request, service: Annotated[AuthSer
     )
 
 @protected_router.post("/logout")
-async def logout(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> JSONResponse:
+async def logout(request: Request, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse:
     user_id = request.cookies.get(SESSION_USER_UUID_STR, "")
     token = request.cookies.get(SESSION_TOKEN_STR, "")
     service.logout(user_id=user_id, token=token)
     
-    response = JSONResponse(
-        content={"message": "Successfully logged out"}
+    response = DatastarResponse(
+        SSE.execute_script("window.location.reload()") # used for refreshing page after logging out to apply the changes
     )
     response.delete_cookie(SESSION_TOKEN_STR) 
     response.delete_cookie(SESSION_USER_UUID_STR) # cookies are not tied to the `Response`` object (you don't need to pass reference)
@@ -128,4 +122,6 @@ async def logout(request: Request, service: Annotated[AuthService, Depends(get_s
                                                   # the browser that will invalidate cookies with SESSION_TOKEN_STR and SESSION_USER_UUID_STR
                                                   # keys => delete_cookie sends signal in the browser which makes browser invalidate them - sets their
                                                   # expiration day to 01.01.1970
+    print("LOGGED OUT")
+
     return response

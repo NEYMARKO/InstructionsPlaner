@@ -20,6 +20,9 @@ class UserService():
     
     def add_user(self, user: UserRequest) -> UserResponse:
         return self.repository.save_user(user)
+
+    def get_user(self, user_id: str) -> UserResponse:
+        return self.repository.get_user(user_id)
     
     def get_users(self) -> list[UserResponse]:
         return self.repository.get_users()

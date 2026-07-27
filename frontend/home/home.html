@@ -12,12 +12,14 @@
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
 </head>
 
-<body data-signals="{_showNotifs:false}">
+<body data-signals="{_showNotifs:false, _showProfile:false}">
 
     <header class="navbar">
+
         <div class="logo">
             📚 Instruction Planner
         </div>
+
 
         <nav>
             <a href="/profile">Profile</a>
@@ -25,17 +27,70 @@
             <a href="/statistics">Statistics</a>
         </nav>
 
+
         <div class="nav-actions">
+
             <button class="notification-btn" data-on:click="
-            $_showNotifs = !$_showNotifs;
-            $_showNotifs && @get('/notifications')
-            ">
+                $_showNotifs = !$_showNotifs;
+                $_showNotifs && @get('/notifications')"> <!--only trigger get request in case _showNotifs is true-->
                 🔔
                 <span class="badge">3</span>
             </button>
 
-            <img class="avatar" src="https://placehold.co/40" alt="Profile">
+
+            <div class="profile-wrapper">
+
+                <button class="profile-btn"
+                        data-on:click="
+                        $_showProfile = !$_showProfile;
+                        $_showProfile && @get('/user')
+                        ">
+
+                    <img class="avatar"
+                         src="https://placehold.co/40"
+                         alt="Profile">
+
+                </button>
+
+
+                <div class="profile-dropdown"
+                     data-class:open="$_showProfile"> <!--appends open to div class name in case _showProfile is true => check in network how does it change when pressign on button-->
+
+                    <div class="profile-header">
+
+                        <img class="profile-large-image"
+                             src="https://placehold.co/80"
+                             alt="Profile">
+
+                        <div>
+                            <strong data-text="$name"></strong>
+                            <small data-text="$email"></small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-actions">
+
+                        <a href="/settings">
+                            ⚙️ Settings
+                        </a>
+
+
+
+                        <button data-on:click="@post('/auth/logout')">
+                            🚪 Logout
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
     </header>
 
 
@@ -52,6 +107,7 @@
                         <div class="section-title">
                             Weekly Schedule
                         </div>
+
 
                         <div class="week-grid">
 
@@ -117,12 +173,13 @@
 
 
                         <div class="cards">
-                            
+
                             {% for instr in instructions %}
                                 {% with training=instr %}
                                     {% include 'home/training/training.html' %}
                                 {% endwith %}
                             {% endfor %}
+
                         </div>
 
                     </section>
@@ -169,6 +226,7 @@
             </div>
 
         </div>
+
 
         {% include 'home/notifications/notifications.html' %}
 

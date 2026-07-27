@@ -1,6 +1,8 @@
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request, HTTPException
+from datastar_py.fastapi import DatastarResponse
+from datastar_py import ServerSentEventGenerator as SSE
 
 
 from ..db import get_db
@@ -9,9 +11,9 @@ from ..shared import SESSION_USER_UUID_STR
 from .authentication import is_authenticated 
 from ..services.user import UserService, UserNotFoundException, UserIdNotProvidedException
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/user")
 
-protected_router = APIRouter(prefix="/users", dependencies=[Depends(is_authenticated)])
+protected_router = APIRouter(prefix="/user", dependencies=[Depends(is_authenticated)])
 
 # this needs to be dependency because it is using db Session, which is getting destroyed after endpoint has ran
 # => if UserService object didn't also get destroyed, it would hold reference to stale/destroyed Session object
@@ -39,9 +41,17 @@ def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
     """
     return UserService(db)
 
+# @router.get("/")
+# async def get_users(service: Annotated[UserService, Depends(get_user_service)]) -> list[UserResponse]:
+#     return service.get_users()
+
 @router.get("/")
-async def get_users(service: Annotated[UserService, Depends(get_user_service)]) -> list[UserResponse]:
-    return service.get_users()
+async def get_user(request: Request, service: Annotated[UserService, Depends(get_user_service)]) -> DatastarResponse:
+    print("HERE")
+    user_info = service.get_user(request.cookies.get(SESSION_USER_UUID_STR, ""))
+    return DatastarResponse(
+        SSE.patch_signals({"name": user_info.username, "email": user_info.email})
+    )
 
 @protected_router.get("/profile")
 async def get_profile(request: Request, service: Annotated[UserService, Depends(get_user_service)]) -> UserResponse:

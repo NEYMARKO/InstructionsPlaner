@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    Base.metadata.drop_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield # everything before yield will be executed before the application starts, everything after it
           # will be executed after application has finished
