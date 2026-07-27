@@ -1,10 +1,14 @@
 from typing import Annotated
+
+from datastar_py import ServerSentEventGenerator as SSE
+from datastar_py.consts import ElementPatchMode
+from datastar_py.fastapi import DatastarResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from fastapi import APIRouter, Depends, Request, HTTPException
 
 from ..services.authentication import AuthService
 from ..shared import SESSION_USER_UUID_STR, templates
-from .authentication import is_authenticated, get_service
+from .authentication import get_service, is_authenticated
 
 router = APIRouter(prefix="")
 
@@ -45,7 +49,7 @@ def get_home(request: Request, auth_service: Annotated[AuthService, Depends(get_
     return templates.TemplateResponse(
         request=request, name="home/home.html", context={"instructions": instructions}
     )
-@router.get("/notifications", response_class=HTMLResponse)
+@router.get("/notifications", response_class=DatastarResponse)
 def get_notifications(request: Request):
     print("USER REQUESTED NOTIFICATIONS")
     notifications = [
@@ -62,6 +66,12 @@ def get_notifications(request: Request):
             "message": "Can't stop lifting"
         }
     ]
-    return templates.TemplateResponse(
-        request=request, name="home/home.html", context={"notifications": notifications}
+    html = templates.get_template("home/notifications.html").render({"notifications": notifications, "request": request})
+    # return templates.TemplateResponse(
+    #     request=request, name="home/home.html", context={"notifications": notifications}
+    # )
+    print(f"{html=}")
+    return DatastarResponse(
+        # SSE.patch_elements(html, selector="#notification-panel", mode=ElementPatchMode.OUTER)
+        SSE.patch_elements(html, selector="#notification-panel", mode="outer")
     )

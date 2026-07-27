@@ -1,0 +1,11 @@
+<aside id="notification-panel" class="notification-panel" data-class:open="$_showNotifs">
+
+    <div class="notification-header">
+        Notifications
+    </div>
+    {% for notif in notifications %}
+        <div class="notification">
+            {{ notif.message }}
+        </div>
+    {% endfor %}
+</aside>
