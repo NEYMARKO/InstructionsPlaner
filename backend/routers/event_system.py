@@ -19,7 +19,7 @@ async def open_notification_pipeline(request: Request):
         ES.subscribe_session(e_subs_id, [])
         try:
             while True:
-                if await request.is_disconnected():
+                if await request.is_disconnected() or ES.should_shutdown():
                     break
                 try:
                     session_notifications = await asyncio.wait_for(ES.get_session_notifications(e_subs_id), timeout=15)

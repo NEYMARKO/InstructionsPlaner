@@ -7,7 +7,7 @@
     <title>Instruction Planner</title>
 
     <link href="{{ url_for('frontend', path='home/home.css') }}" rel="stylesheet">
-    <link href="{{ url_for('frontend', path='home/notifications.css') }}" rel="stylesheet">
+    <link href="{{ url_for('frontend', path='home/notifications/notifications.css') }}" rel="stylesheet">
 
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
 </head>
@@ -120,7 +120,7 @@
                             
                             {% for instr in instructions %}
                                 {% with training=instr %}
-                                    {% include 'home/practice.html' %}
+                                    {% include 'home/training/training.html' %}
                                 {% endwith %}
                             {% endfor %}
                         </div>
@@ -170,15 +170,7 @@
 
         </div>
 
-        {% include 'home/notifications.html' %}
-        <!-- <aside id="notification-panel" class="notification-panel" data-class:open="$_showNotifs">
-            
-            <div class="notification-header">
-                Notifications
-            </div>
-            
-
-        </aside> -->
+        {% include 'home/notifications/notifications.html' %}
 
     </div>
 

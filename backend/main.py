@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
+import signal
+import asyncio
 
 from backend.routers.home import router as home_router
 from backend.routers.user import router as user_router, protected_router as protected_user_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
@@ -9,12 +11,28 @@ from backend.routers.event_system import router as event_system_router
 
 from backend.routers.counter import router as counter_router
 
+from .notifications import event_system as ES
 
 from .models import Base
 from .db import engine
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    original_sigint = signal.getsignal(signal.SIGINT)
+    original_sigterm = signal.getsignal(signal.SIGTERM)
+
+    def handle_signal(signum, frame):
+        print(f"[shutdown] received signal {signum} at {asyncio.get_event_loop().time()}")
+        # chain to uvicorn's original handler so its own shutdown sequence still runs
+        ES.shutdown_streams()
+        if signum == signal.SIGINT and callable(original_sigint):
+            original_sigint(signum, frame)
+        elif signum == signal.SIGTERM and callable(original_sigterm):
+            original_sigterm(signum, frame)
+
+    signal.signal(signal.SIGINT, handle_signal)
+    signal.signal(signal.SIGTERM, handle_signal)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield # everything before yield will be executed before the application starts, everything after it

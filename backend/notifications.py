@@ -50,6 +50,7 @@ class SingletonMeta(type):
 
 class EventSystem(metaclass=SingletonMeta):
     _notification_queue: dict[str, list[dict[str, str]]] = {}
+    _shutdown: bool = False
     
     def subscribe_session(self, subscription_id: str, notifications: list[dict[str, str]] = []) -> None:
         if subscription_id not in self._notification_queue:
@@ -85,5 +86,12 @@ class EventSystem(metaclass=SingletonMeta):
             for key in notif:
                 signals[key] = notif[key]
         return signals
+
+    def shutdown_streams(self) -> None:
+        self._notification_queue.clear()
+        self._shutdown = True
+
+    def should_shutdown(self) -> bool:
+        return self._shutdown
 
 event_system = EventSystem()

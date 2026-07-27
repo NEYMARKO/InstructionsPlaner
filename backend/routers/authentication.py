@@ -79,23 +79,6 @@ async def login(request: Request, credentials: UserCredentials, service: Annotat
     )
     response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
     response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_uuid_str)
-    # response.set_cookie(
-    #     key=SESSION_TOKEN_STR,
-    #     value=service_response.token,
-    #     httponly=True,
-    #     secure=True,
-    #     samesite="lax",
-    #     max_age=3600
-    # )
-
-    # response.set_cookie(
-    #     key=SESSION_USER_UUID_STR,
-    #     value=service_response.user_uuid_str,
-    #     httponly=True,
-    #     secure=True,
-    #     samesite="lax",
-    #     max_age=3600
-    # )
     return response
 
 @router.get("/sign-up", response_class=HTMLResponse)
@@ -104,13 +87,8 @@ def get_sign_up(request: Request):
         request=request, name="registration/register.html"
     )
 
-# @router.post("/sign-up", response_class=StreamingResponse)
 @router.post("/sign-up", response_model=None)
-# @datastar_response
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse | None:
-    # yield SSE.patch_signals({"error": ""})
-    # async for event_type, msg in service.sign_up(user):
-    #     yield SSE.patch_signals({f"{event_type}Msg": msg})
     event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
     service_response = await service.sign_up(event_subscription_id, user)
     if service_response:
