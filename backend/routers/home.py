@@ -62,6 +62,9 @@ def get_notifications(request: Request):
         },
         {
             "message": "Can't stop lifting"
+        },
+        {
+            "message": "This is suppoused to be an extremly long message to test how will it fit into notifications side panel"
         }
     ]
     html = templates.get_template("home/notifications/notifications.html").render({"notifications": notifications, "request": request})
