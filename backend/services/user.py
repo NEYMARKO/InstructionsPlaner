@@ -1,8 +1,12 @@
 from __future__ import annotations
+
 from sqlalchemy.orm import Session
 
+from backend.dto.user import UserUpdate
+
+from ..dto.user import UserRequest, UserResponse
 from ..repositories.user import UserRepository
-from ..dto.user import UserResponse, UserRequest
+
 
 class UserIdNotProvidedException(Exception):
     pass
@@ -21,7 +25,7 @@ class UserService:
     def add_user(self, user: UserRequest) -> UserResponse:
         return self.repository.save_user(user)
 
-    def get_user(self, user_id: str) -> UserResponse:
+    def get_user(self, user_id: str) -> UserResponse | None:
         return self.repository.get_user(user_id)
     
     def get_users(self) -> list[UserResponse]:
@@ -34,6 +38,7 @@ class UserService:
             raise UserNotFoundException(f"Can't locate user with id: {user_id}")
         return result
 
-    def update_profile(self, changes: dict[str, str]):
-        filtered = {k: v for k, v in changes.items() if v} # only pass attributes that have value => if some value is empty, it's attribute most likely isn't getting updated
-        return self.repository.update_profile(filtered)
+    def update_user(self, user_id: str, updated_info: UserUpdate) -> UserUpdate:
+        # filtered = {k: v for k, v in changes.items() if v} # only pass attributes that have value => if some value is empty, it's attribute most likely isn't getting updated
+        return self.repository.update_profile(user_id, updated_info)
+        # return self.repository.update_profile(filtered)

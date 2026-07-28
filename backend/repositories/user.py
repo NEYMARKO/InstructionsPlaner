@@ -1,10 +1,14 @@
-from ..models import UserModel
-from ..dto.user import UserResponse, UserRequest
-
 from uuid import UUID
-from sqlalchemy import text
-from sqlalchemy import select
+
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import update
+
+from backend.dto.user import UserUpdate
+
+from ..dto.user import UserRequest, UserResponse
+from ..models import UserModel
+
 
 class UserRepository():
 
@@ -19,9 +23,12 @@ class UserRepository():
         self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
         return UserResponse.model_validate(new_user_model)
 
-    def get_user(self, user_id: str) -> UserResponse:
+    def get_user(self, user_id: str) -> UserResponse | None:
         query = select(UserModel).where(UserModel.id==user_id)
-        return self.db.execute(query).scalar_one_or_none()
+        result = self.db.execute(query).scalar_one_or_none()
+        if not result:
+            return None
+        return UserResponse.model_validate(result)
     
     def get_users(self) -> list[UserResponse]:
         result = self.db.execute(text("SELECT * FROM public.user"))
@@ -59,6 +66,11 @@ class UserRepository():
             return None
         return UserResponse.model_validate(result)
 
-    def update_profile(self, changes: dict[str, str]) -> None:
-        print(f"{changes=}")
-        return
+    def update_profile(self, user_id: str, updated_info: UserUpdate) -> UserUpdate:
+        print(f"{updated_info=}")
+        print(f"HERE")
+        query = update(UserModel).where(UserModel.id==user_id).values(username=updated_info.username, email=updated_info.email)
+        result = self.db.execute(query)
+        print(f"{result=}")
+        self.db.commit()
+        return UserUpdate.model_validate(result)

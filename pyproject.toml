@@ -15,3 +15,7 @@ dependencies = [
 
 [tool.fastapi]
 entrypoint = "backend.main:app" # root is in the same level as pyproject.toml
+
+[tool.ruff.lint]
+select = ["F401", "I001"] # Controls what exactly is "source.fixAll.ruff" allowed to do in ...AppData\Roaming\Code\User\settings.json
+                          # => only import ordering and removal of unused imports have been enabled

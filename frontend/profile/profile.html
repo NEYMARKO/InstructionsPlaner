@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,238 +9,242 @@
 
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
 </head>
+
 <body>
 
-<div class="settings-layout">
+    <div class="settings-layout" data-signals="
+        {username: '{{ username }}' ? '{{ username }}' : '', 
+        realName: '{{ real_name }}' ? '{{ real_name }}' : '', 
+        email: '{{ email }}' ? '{{ email }}' : ''}"
+    >
 
 
-    <!-- Navigation -->
+        <!-- Navigation -->
 
-    {% include 'profile/side_navbar.html' %}
-
-
-
-    <!-- Content -->
-
-    <main class="settings-content">
-
-
-        <header class="content-header">
-
-            <div>
-
-                <h1>Public profile</h1>
-
-                <p>
-                    Manage the information other users see.
-                </p>
-
-            </div>
-
-        </header>
+        {% include 'profile/side_navbar.html' %}
 
 
 
-        <!-- existing profile sections -->
+        <!-- Content -->
 
-        <section class="panel">
-
-            <div class="panel-title">
-
-                <h2>Account</h2>
-
-                <p>
-                    Your basic account information.
-                </p>
-
-            </div>
+        <main class="settings-content">
 
 
-            <div class="form">
+            <header class="content-header">
+
+                <div>
+
+                    <h1>Public profile</h1>
+
+                    <p>
+                        Manage the information other users see.
+                    </p>
+
+                </div>
+
+            </header>
 
 
-                <div class="field">
 
-                    <label>
-                        Avatar
-                    </label>
+            <!-- existing profile sections -->
+
+            <section class="panel">
+
+                <div class="panel-title">
+
+                    <h2>Account</h2>
+
+                    <p>
+                        Your basic account information.
+                    </p>
+
+                </div>
 
 
-                    <div class="avatar-edit">
+                <div class="form">
 
-                        <img
-                            src="https://i.pravatar.cc/100"
-                            class="avatar small">
 
-                        <button class="btn secondary">
-                            Change photo
-                        </button>
+                    <div class="field">
+
+                        <label>
+                            Avatar
+                        </label>
+
+
+                        <div class="avatar-edit">
+
+                            <img src="https://i.pravatar.cc/100" class="avatar small">
+
+                            <button class="btn secondary">
+                                Change photo
+                            </button>
+
+                        </div>
 
                     </div>
 
+
+
+                    <div class="field">
+
+                        <label>
+                            Username
+                        </label>
+
+                        <input data-bind:username> <!--This element's value will get updated when signal gets updated (backend updates it), and signal will also get updated when this value gets updated (frontend updates it - user updates it manually)-->
+
+                    </div>
+
+
+
+                    <div class="field">
+
+                        <label>
+                            Display name
+                        </label>
+
+                        <input data-bind:realName value="$realName">
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <input data-bind:email value="$email">
+
+                    </div>
+
+
                 </div>
 
-
-
-                <div class="field">
-
-                    <label>
-                        Username
-                    </label>
-
-                    <input value="janedoe">
-
-                </div>
-
-
-
-                <div class="field">
-
-                    <label>
-                        Display name
-                    </label>
-
-                    <input value="Jane Doe">
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Email
-                    </label>
-
-                    <input value="jane@example.com">
-
-                </div>
-
-
-            </div>
-
-        </section>
+            </section>
 
 
 
 
-        <section class="panel">
+            <section class="panel">
 
-            <div class="panel-title">
+                <div class="panel-title">
 
-                <h2>Personal</h2>
+                    <h2>Personal</h2>
 
-                <p>
-                    Used for localization and communication.
-                </p>
-
-            </div>
-
-
-            <div class="form">
-
-
-                <div class="field">
-
-                    <label>
-                        Country
-                    </label>
-
-                    <input>
+                    <p>
+                        Used for localization and communication.
+                    </p>
 
                 </div>
 
 
-                <div class="field">
+                <div class="form">
 
-                    <label>
-                        City
-                    </label>
 
-                    <input>
+                    <div class="field">
+
+                        <label>
+                            Country
+                        </label>
+
+                        <input>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            City
+                        </label>
+
+                        <input>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Timezone
+                        </label>
+
+                        <select>
+
+                            <option>
+                                Europe/Zagreb
+                            </option>
+
+                        </select>
+
+                    </div>
+
 
                 </div>
 
 
-                <div class="field">
+            </section>
 
-                    <label>
-                        Timezone
-                    </label>
 
-                    <select>
 
-                        <option>
-                            Europe/Zagreb
-                        </option>
+            <section class="panel">
 
-                    </select>
+
+                <div class="panel-title">
+
+                    <h2>About</h2>
+
+                    <p>
+                        Tell others something about yourself.
+                    </p>
 
                 </div>
 
 
-            </div>
+                <div class="form">
 
 
-        </section>
+                    <div class="field textarea-field">
 
+                        <label>
+                            Bio
+                        </label>
 
-
-        <section class="panel">
-
-
-            <div class="panel-title">
-
-                <h2>About</h2>
-
-                <p>
-                    Tell others something about yourself.
-                </p>
-
-            </div>
-
-
-            <div class="form">
-
-
-                <div class="field textarea-field">
-
-                    <label>
-                        Bio
-                    </label>
-
-                    <textarea>
+                        <textarea>
 Backend developer and fitness enthusiast.
                     </textarea>
 
+                    </div>
+
+
                 </div>
 
 
-            </div>
-
-
-        </section>
+            </section>
 
 
 
-        <footer>
+            <footer>
 
-            <button class="btn secondary">
-                Cancel
-            </button>
-
-
-            <button class="btn primary">
-                Update profile
-            </button>
-
-        </footer>
+                <button class="btn secondary">
+                    Cancel
+                </button>
 
 
+                <button class="btn primary" data-on:click="@patch('/settings/profile')">
+                    Update profile
+                </button>
 
-    </main>
+            </footer>
 
 
-</div>
+
+        </main>
+
+
+    </div>
 
 </body>
+
 </html>

@@ -1,6 +1,8 @@
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
 
 class UserBase(BaseModel):
     username: str
@@ -16,7 +18,11 @@ class UserBase(BaseModel):
     )
 
 class UserUpdate(UserBase):
-    pass
+    username: str
+    display_name: str
+    email: str
+    country: str
+    city: str
 
 class UserResponse(UserBase):
     id: UUID

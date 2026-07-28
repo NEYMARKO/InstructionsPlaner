@@ -1,14 +1,16 @@
 from typing import Annotated
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Request, HTTPException
-from datastar_py.fastapi import DatastarResponse
+
 from datastar_py import ServerSentEventGenerator as SSE
+from datastar_py.fastapi import DatastarResponse
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..shared import SESSION_USER_UUID_STR, templates
-from .authentication import is_authenticated 
-from backend.dto.user import UserResponse, UserUpdate
-from ..services.user import UserService, UserNotFoundException, UserIdNotProvidedException
+from ..services.user import (
+    UserService,
+)
+from ..shared import SESSION_USER_UUID_STR
+from .authentication import is_authenticated
 
 router = APIRouter(prefix="/user")
 
@@ -48,15 +50,17 @@ def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
 async def get_user(request: Request, service: Annotated[UserService, Depends(get_user_service)]) -> DatastarResponse:
     print("HERE")
     user_info = service.get_user(request.cookies.get(SESSION_USER_UUID_STR, ""))
+    if not user_info:
+        return DatastarResponse()
     return DatastarResponse(
         SSE.patch_signals({"name": user_info.username, "email": user_info.email})
     )
 
-@protected_router.get("/profile")
-async def get_profile(request: Request, service: Annotated[UserService, Depends(get_user_service)]):
-    return templates.TemplateResponse(request=request, name="profile/profile.html")
+# @protected_router.get("/profile")
+# async def get_profile(request: Request, service: Annotated[UserService, Depends(get_user_service)]):
+#     return templates.TemplateResponse(request=request, name="profile/profile.html")
 
-@protected_router.patch("/profile")
-async def update_profile(user_changes: UserUpdate, service: Annotated[UserService, Depends(get_user_service)]):
-    service.update_profile(vars(user_changes))
-    return
+# @protected_router.patch("/profile")
+# async def update_profile(request: Request, user_changes: UserUpdate, service: Annotated[UserService, Depends(get_user_service)]):
+#     service.update_user(request.cookies.get(SESSION_USER_UUID_STR, ""), user_changes)
+#     return

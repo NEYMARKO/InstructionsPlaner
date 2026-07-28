@@ -1,23 +1,26 @@
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
-from fastapi import Request
-import signal
 import asyncio
+import signal
+from contextlib import asynccontextmanager
 
-from backend.routers.home import router as home_router
-from backend.routers.user import router as user_router, protected_router as protected_user_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
-from backend.routers.authentication import router as auth_router, protected_router as protected_auth_router, NotAuthenticatedException
-from backend.routers.event_system import router as event_system_router
-from backend.routers.settings import protected_router as settings_router
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
+from backend.routers.authentication import NotAuthenticatedException
+from backend.routers.authentication import protected_router as protected_auth_router
+from backend.routers.authentication import router as auth_router
 from backend.routers.counter import router as counter_router
+from backend.routers.event_system import router as event_system_router
+from backend.routers.home import router as home_router
+from backend.routers.settings import protected_router as settings_router
+from backend.routers.user import protected_router as protected_user_router
+from backend.routers.user import (  # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
+    router as user_router,
+)
 
-from .notifications import event_system as ES
-
-from .models import Base
 from .db import engine
+from .models import Base
+from .notifications import event_system as ES
 
 
 @asynccontextmanager
