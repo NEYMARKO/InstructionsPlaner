@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link href="{{ url_for('frontend', path='profile/profile.css') }}" rel="stylesheet">
+    <link href="{{ url_for('frontend', path='profile/account.css') }}" rel="stylesheet">
+
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
+</head>
+
+<body>
+
+    <div class="settings-layout">
+
+
+        <!-- Navigation -->
+
+        {% include 'profile/side_navbar.html' %}
+
+        <!-- Content -->
+
+        <main class="settings-content">
+
+
+            <header class="content-header">
+
+                <h1>Notifications</h1>
+
+                <p>
+                    Choose what you want to be notified about.
+                </p>
+
+            </header>
+
+
+
+            <section class="panel">
+
+
+                <div class="panel-title">
+
+                    <h2>Activities</h2>
+
+                    <p>
+                        Important reminders and updates.
+                    </p>
+
+                </div>
+
+
+
+                <div class="settings-list">
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Workout reminders</h3>
+
+                            <p>
+                                Get notified before scheduled workouts.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Lesson reminders</h3>
+
+                            <p>
+                                Receive reminders before tutoring sessions.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Messages</h3>
+
+                            <p>
+                                Notifications from instructors and students.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox" checked>
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <section class="panel">
+
+
+                <div class="panel-title">
+
+                    <h2>Email notifications</h2>
+
+                    <p>
+                        Control emails sent to your inbox.
+                    </p>
+
+                </div>
+
+
+
+                <div class="settings-list">
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Weekly summary</h3>
+
+                            <p>
+                                Receive progress updates every week.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox">
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Product updates</h3>
+
+                            <p>
+                                News about new features.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox">
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

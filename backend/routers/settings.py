@@ -15,5 +15,18 @@ async def get_profile(request: Request):
     return templates.TemplateResponse(request=request, name="profile/profile.html")
 
 @protected_router.get("/account")
-async def update_profile(request: Request):
+async def get_account(request: Request):
     return templates.TemplateResponse(request=request, name="profile/account.html")
+
+@protected_router.get("/appearance")
+async def get_appearance(request: Request):
+    return templates.TemplateResponse(request=request, name="profile/appearance.html")
+
+@protected_router.get("/accessibility")
+async def get_accessibilityy(request: Request):
+    return templates.TemplateResponse(request=request, name="profile/accessibility.html")
+
+
+@protected_router.get("/notifications")
+async def get_notifications(request: Request):
+    return templates.TemplateResponse(request=request, name="profile/notifications.html")

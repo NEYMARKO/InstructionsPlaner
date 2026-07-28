@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link href="{{ url_for('frontend', path='profile/profile.css') }}" rel="stylesheet">
+    <link href="{{ url_for('frontend', path='profile/account.css') }}" rel="stylesheet">
+
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
+</head>
+
+<body>
+
+    <div class="settings-layout">
+
+
+        <!-- Navigation -->
+
+        {% include 'profile/side_navbar.html' %}
+
+        <!-- Content -->
+
+        <main class="settings-content">
+
+            <header class="content-header">
+
+                <h1>Appearance</h1>
+
+                <p>
+                    Customize how the application looks and feels.
+                </p>
+
+            </header>
+
+
+            <section class="panel">
+
+                <div class="panel-title">
+
+                    <h2>Theme</h2>
+
+                    <p>
+                        Choose your preferred color scheme.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <div class="settings-row">
+
+                        <div>
+                            <h3>Color theme</h3>
+
+                            <p>
+                                Select how the app appears.
+                            </p>
+                        </div>
+
+
+                        <select class="small-control">
+
+                            <option>Dark</option>
+                            <option>Light</option>
+                            <option>System</option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Compact mode</h3>
+
+                            <p>
+                                Show more information with less spacing.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox">
+
+                            <span></span>
+
+                        </label>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <section class="panel">
+
+                <div class="panel-title">
+
+                    <h2>Motion</h2>
+
+                    <p>
+                        Control animations and transitions.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <div class="settings-row">
+
+                        <div>
+
+                            <h3>Reduce animations</h3>
+
+                            <p>
+                                Minimize movement effects.
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input type="checkbox">
+
+                            <span></span>
+
+                        </label>
+
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+</body>
+
+</html>
