@@ -1,12 +1,1 @@
-<a data-on:click="
-            idx =  Array.from(el.parentElement.children).indexOf(el); 
-            $_activeItems[idx] = true;
-            Object.keys($_activeItems).forEach((key) => {
-                $_activeItems[key] = Number(key) === idx;
-            });
-
-        " data-class:active="
-            $_activeItems[
-                Array.from(el.parentElement.children).indexOf(el)
-            ]
-        " class="nav-item "
+<a data-class:active="$_activePath == el.getAttribute('href')" class="nav-item "
