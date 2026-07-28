@@ -5,6 +5,7 @@ from pydantic.alias_generators import to_camel
 class UserBase(BaseModel):
     username: str
     email: str
+    # city: str
     is_student: bool = False
 
     model_config = ConfigDict(
@@ -13,6 +14,9 @@ class UserBase(BaseModel):
         validate_by_name=True,
         from_attributes=True
     )
+
+class UserUpdate(UserBase):
+    pass
 
 class UserResponse(UserBase):
     id: UUID

@@ -21,6 +21,7 @@ class UserModel(Base):
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    # city: Mapped[str | None] = mapped_column(String, nullable=True)
     is_student: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     r_session: Mapped[list[UUID[str]]] = relationship(

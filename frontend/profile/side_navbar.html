@@ -1,0 +1,34 @@
+<!-- Navigation -->
+
+<aside class="settings-nav" data-init="
+        $_itemCount = el.querySelectorAll('a').length;
+        $_activeItems = Object.fromEntries(
+            Array.from({length: $_itemCount}, (_, i) => [i, false])
+        );">
+
+   {% include 'profile/navbar_link.html' %} href = "/settings/profile">
+        <span class="nav-icon">◯</span>
+        Public profile
+    </a>
+
+   {% include 'profile/navbar_link.html' %} href = "/settings/account">
+        <span class="nav-icon">⚙</span>
+        Account
+    </a>
+
+    {% include 'profile/navbar_link.html' %} href = "/settings/profile">
+        <span class="nav-icon">◐</span>
+        Appearance
+    </a>
+
+   {% include 'profile/navbar_link.html' %} href = "/settings/profile">
+        <span class="nav-icon">⚝</span>
+        Accessibility
+    </a>
+
+    {% include 'profile/navbar_link.html' %} href = "/settings/profile">
+        <span class="nav-icon">♧</span>
+        Notifications
+    </a>
+
+</aside>

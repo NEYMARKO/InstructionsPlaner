@@ -10,6 +10,7 @@ from backend.routers.home import router as home_router
 from backend.routers.user import router as user_router, protected_router as protected_user_router # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
 from backend.routers.authentication import router as auth_router, protected_router as protected_auth_router, NotAuthenticatedException
 from backend.routers.event_system import router as event_system_router
+from backend.routers.settings import protected_router as settings_router
 
 from backend.routers.counter import router as counter_router
 
@@ -44,7 +45,7 @@ app = FastAPI(lifespan=lifespan) # this gets triggered every time application is
 
 @app.exception_handler(NotAuthenticatedException)
 async def not_authenticated_handler(request: Request, exc: NotAuthenticatedException):
-    return RedirectResponse(url="auth/login", status_code=303)
+    return RedirectResponse(url="/auth/login", status_code=303)
 
 app.include_router(home_router)
 app.include_router(user_router)
@@ -52,7 +53,7 @@ app.include_router(protected_user_router)
 app.include_router(auth_router)
 app.include_router(protected_auth_router)
 app.include_router(event_system_router)
-
+app.include_router(settings_router)
 
 app.include_router(counter_router)
 

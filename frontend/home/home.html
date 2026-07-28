@@ -12,7 +12,7 @@
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
 </head>
 
-<body data-signals="{_showNotifs:false, _showProfile:false}">
+<body data-signals="{_showNotifs:false, _showProfile:false, notifCount: 0}">
 
     <header class="navbar">
 
@@ -22,7 +22,7 @@
 
 
         <nav>
-            <a href="/profile">Profile</a>
+            <a href="/user/profile">Profile</a>
             <a href="/instructions/history">Past Instructions</a>
             <a href="/statistics">Statistics</a>
         </nav>
@@ -34,7 +34,7 @@
                 $_showNotifs = !$_showNotifs;
                 $_showNotifs && @get('/notifications')"> <!--only trigger get request in case _showNotifs is true-->
                 🔔
-                <span class="badge">3</span>
+                <span class="badge" data-text="$notifCount == 0 ? {{ notifCnt }} : $notifCount"></span>
             </button>
 
 

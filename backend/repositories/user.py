@@ -33,6 +33,7 @@ class UserRepository():
                 id=row.id,
                 username=row.username,
                 email=row.email,
+                # city=row.city,
                 is_student=row["is_student"]
             )
             for row in rows
@@ -57,3 +58,7 @@ class UserRepository():
         if result is None:
             return None
         return UserResponse.model_validate(result)
+
+    def update_profile(self, changes: dict[str, str]) -> None:
+        print(f"{changes=}")
+        return

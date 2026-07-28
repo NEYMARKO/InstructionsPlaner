@@ -3,6 +3,7 @@ from datastar_py.consts import ElementPatchMode
 from datastar_py.fastapi import DatastarResponse
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
+from datastar_py.sanic import datastar_response
 
 from ..shared import SESSION_USER_UUID_STR, templates
 from .authentication import is_authenticated
@@ -40,11 +41,13 @@ def get_home(request: Request):
             "time": "13:00 - 15:00"
         }
     ]
+    notif_count = 5
     return templates.TemplateResponse(
-        request=request, name="home/home.html", context={"instructions": instructions}
+        request=request, name="home/home.html", context={"instructions": instructions, "notifCnt": notif_count}
     )
 
-@router.get("/notifications", response_class=DatastarResponse)
+@datastar_response
+@router.get("/notifications", response_class=DatastarResponse, response_model=None)
 def get_notifications(request: Request):
     print("USER REQUESTED NOTIFICATIONS")
     notifications = [
@@ -62,6 +65,5 @@ def get_notifications(request: Request):
         }
     ]
     html = templates.get_template("home/notifications/notifications.html").render({"notifications": notifications, "request": request})
-    return DatastarResponse(
-        SSE.patch_elements(html, selector="#notification-panel", mode=ElementPatchMode.OUTER)
-    )
+    yield SSE.patch_elements(html, selector="#notification-panel", mode=ElementPatchMode.OUTER)
+    yield SSE.patch_signals({"notifCount": len(notifications)})
