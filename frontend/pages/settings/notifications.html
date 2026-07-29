@@ -1,225 +1,218 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "components/shared/navbar_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
-    <link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
-    <link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+<link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
 
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
-</head>
+{% endblock stylesheet_import %}
 
-<body>
+{% block body_content %}
 
-    <div class="settings-layout">
+<div class="settings-layout">
 
 
-        <!-- Navigation -->
+    <!-- Navigation -->
 
-        {% include 'profile/side_navbar.html' %}
+    {% include 'components/settings/side_navbar.html' %}
 
-        <!-- Content -->
+    <!-- Content -->
 
-        <main class="settings-content">
+    <main class="settings-content">
 
 
-            <header class="content-header">
+        <header class="content-header">
 
-                <h1>Notifications</h1>
+            <h1>Notifications</h1>
+
+            <p>
+                Choose what you want to be notified about.
+            </p>
+
+        </header>
+
+
+
+        <section class="panel">
+
+
+            <div class="panel-title">
+
+                <h2>Activities</h2>
 
                 <p>
-                    Choose what you want to be notified about.
+                    Important reminders and updates.
                 </p>
 
-            </header>
+            </div>
 
 
 
-            <section class="panel">
+            <div class="settings-list">
 
 
-                <div class="panel-title">
+                <div class="settings-row">
 
-                    <h2>Activities</h2>
+                    <div>
 
-                    <p>
-                        Important reminders and updates.
-                    </p>
+                        <h3>Workout reminders</h3>
+
+                        <p>
+                            Get notified before scheduled workouts.
+                        </p>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input type="checkbox" checked>
+
+                        <span></span>
+
+                    </label>
+
 
                 </div>
 
 
 
-                <div class="settings-list">
 
+                <div class="settings-row">
 
-                    <div class="settings-row">
+                    <div>
 
-                        <div>
+                        <h3>Lesson reminders</h3>
 
-                            <h3>Workout reminders</h3>
-
-                            <p>
-                                Get notified before scheduled workouts.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox" checked>
-
-                            <span></span>
-
-                        </label>
-
+                        <p>
+                            Receive reminders before tutoring sessions.
+                        </p>
 
                     </div>
 
 
+                    <label class="switch">
 
+                        <input type="checkbox" checked>
 
-                    <div class="settings-row">
+                        <span></span>
 
-                        <div>
-
-                            <h3>Lesson reminders</h3>
-
-                            <p>
-                                Receive reminders before tutoring sessions.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox" checked>
-
-                            <span></span>
-
-                        </label>
-
-
-                    </div>
-
-
-
-
-                    <div class="settings-row">
-
-                        <div>
-
-                            <h3>Messages</h3>
-
-                            <p>
-                                Notifications from instructors and students.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox" checked>
-
-                            <span></span>
-
-                        </label>
-
-
-                    </div>
+                    </label>
 
 
                 </div>
 
 
-            </section>
 
 
+                <div class="settings-row">
 
-            <section class="panel">
+                    <div>
 
+                        <h3>Messages</h3>
 
-                <div class="panel-title">
-
-                    <h2>Email notifications</h2>
-
-                    <p>
-                        Control emails sent to your inbox.
-                    </p>
-
-                </div>
-
-
-
-                <div class="settings-list">
-
-
-                    <div class="settings-row">
-
-                        <div>
-
-                            <h3>Weekly summary</h3>
-
-                            <p>
-                                Receive progress updates every week.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox">
-
-                            <span></span>
-
-                        </label>
-
+                        <p>
+                            Notifications from instructors and students.
+                        </p>
 
                     </div>
 
 
-                    <div class="settings-row">
+                    <label class="switch">
 
-                        <div>
+                        <input type="checkbox" checked>
 
-                            <h3>Product updates</h3>
+                        <span></span>
 
-                            <p>
-                                News about new features.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox">
-
-                            <span></span>
-
-                        </label>
-
-
-                    </div>
+                    </label>
 
 
                 </div>
 
 
-            </section>
+            </div>
+
+
+        </section>
 
 
 
-        </main>
+        <section class="panel">
 
-    </div>
 
-</body>
+            <div class="panel-title">
 
-</html>
+                <h2>Email notifications</h2>
+
+                <p>
+                    Control emails sent to your inbox.
+                </p>
+
+            </div>
+
+
+
+            <div class="settings-list">
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Weekly summary</h3>
+
+                        <p>
+                            Receive progress updates every week.
+                        </p>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input type="checkbox">
+
+                        <span></span>
+
+                    </label>
+
+
+                </div>
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Product updates</h3>
+
+                        <p>
+                            News about new features.
+                        </p>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input type="checkbox">
+
+                        <span></span>
+
+                    </label>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+    </main>
+
+</div>
+
+{% endblock body_content %}

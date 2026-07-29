@@ -1,161 +1,154 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "components/shared/navbar_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
-    <link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
-    <link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+<link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
 
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
-</head>
+{% endblock stylesheet_import %}
 
-<body>
+{% block body_content %}
 
-    <div class="settings-layout">
+<div class="settings-layout">
 
 
-        <!-- Navigation -->
+    <!-- Navigation -->
 
-        {% include 'components/settings/side_navbar.html' %}
+    {% include 'components/settings/side_navbar.html' %}
 
-        <!-- Content -->
+    <!-- Content -->
 
-        <main class="settings-content">
+    <main class="settings-content">
 
-            <header class="content-header">
+        <header class="content-header">
 
-                <h1>Appearance</h1>
+            <h1>Appearance</h1>
+
+            <p>
+                Customize how the application looks and feels.
+            </p>
+
+        </header>
+
+
+        <section class="panel">
+
+            <div class="panel-title">
+
+                <h2>Theme</h2>
 
                 <p>
-                    Customize how the application looks and feels.
+                    Choose your preferred color scheme.
                 </p>
 
-            </header>
+            </div>
 
 
-            <section class="panel">
+            <div class="settings-list">
 
-                <div class="panel-title">
 
-                    <h2>Theme</h2>
+                <div class="settings-row">
 
-                    <p>
-                        Choose your preferred color scheme.
-                    </p>
+                    <div>
+                        <h3>Color theme</h3>
+
+                        <p>
+                            Select how the app appears.
+                        </p>
+                    </div>
+
+
+                    <select class="small-control">
+
+                        <option>Dark</option>
+                        <option>Light</option>
+                        <option>System</option>
+
+                    </select>
 
                 </div>
 
 
-                <div class="settings-list">
 
+                <div class="settings-row">
 
-                    <div class="settings-row">
+                    <div>
 
-                        <div>
-                            <h3>Color theme</h3>
+                        <h3>Compact mode</h3>
 
-                            <p>
-                                Select how the app appears.
-                            </p>
-                        </div>
-
-
-                        <select class="small-control">
-
-                            <option>Dark</option>
-                            <option>Light</option>
-                            <option>System</option>
-
-                        </select>
+                        <p>
+                            Show more information with less spacing.
+                        </p>
 
                     </div>
 
 
+                    <label class="switch">
 
-                    <div class="settings-row">
+                        <input type="checkbox">
 
-                        <div>
+                        <span></span>
 
-                            <h3>Compact mode</h3>
+                    </label>
 
-                            <p>
-                                Show more information with less spacing.
-                            </p>
-
-                        </div>
+                </div>
 
 
-                        <label class="switch">
+            </div>
 
-                            <input type="checkbox">
 
-                            <span></span>
+        </section>
 
-                        </label>
+
+
+        <section class="panel">
+
+            <div class="panel-title">
+
+                <h2>Motion</h2>
+
+                <p>
+                    Control animations and transitions.
+                </p>
+
+            </div>
+
+
+            <div class="settings-list">
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Reduce animations</h3>
+
+                        <p>
+                            Minimize movement effects.
+                        </p>
 
                     </div>
 
 
-                </div>
+                    <label class="switch">
 
+                        <input type="checkbox">
 
-            </section>
+                        <span></span>
 
-
-
-            <section class="panel">
-
-                <div class="panel-title">
-
-                    <h2>Motion</h2>
-
-                    <p>
-                        Control animations and transitions.
-                    </p>
-
-                </div>
-
-
-                <div class="settings-list">
-
-
-                    <div class="settings-row">
-
-                        <div>
-
-                            <h3>Reduce animations</h3>
-
-                            <p>
-                                Minimize movement effects.
-                            </p>
-
-                        </div>
-
-
-                        <label class="switch">
-
-                            <input type="checkbox">
-
-                            <span></span>
-
-                        </label>
-
-
-                    </div>
+                    </label>
 
 
                 </div>
 
-            </section>
+
+            </div>
+
+        </section>
 
 
-        </main>
+    </main>
 
 
-    </div>
+</div>
 
-</body>
-
-</html>
+{% endblock body_content %}

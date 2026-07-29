@@ -1,254 +1,246 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "components/shared/navbar_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
-    <link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+{% endblock stylesheet_import %}
 
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
-</head>
+{% block body_content %}
 
-<body>
-
-    <div class="settings-layout" data-signals="
+<div class="settings-layout" data-signals="
         {
             username: '{{ username }}' ? '{{ username }}' : '', 
             displayName: '{{ display_name }}' ? '{{ display_name }}' : '', 
             email: '{{ email }}' ? '{{ email }}' : '',
             country: '{{ country }}' ? '{{ country }}' : '',
             city: '{{ city }}' ? '{{ city }}' : '',
-        }"
-    >
+        }">
 
 
-        <!-- Navigation -->
+    <!-- Navigation -->
 
-        {% include 'components/settings/side_navbar.html' %}
-
-
-
-        <!-- Content -->
-
-        <main class="settings-content">
-
-
-            <header class="content-header">
-
-                <div>
-
-                    <h1>Public profile</h1>
-
-                    <p>
-                        Manage the information other users see.
-                    </p>
-
-                </div>
-
-            </header>
+    {% include 'components/settings/side_navbar.html' %}
 
 
 
-            <!-- existing profile sections -->
+    <!-- Content -->
 
-            <section class="panel">
-
-                <div class="panel-title">
-
-                    <h2>Account</h2>
-
-                    <p>
-                        Your basic account information.
-                    </p>
-
-                </div>
+    <main class="settings-content">
 
 
-                <div class="form">
+        <header class="content-header">
+
+            <div>
+
+                <h1>Public profile</h1>
+
+                <p>
+                    Manage the information other users see.
+                </p>
+
+            </div>
+
+        </header>
 
 
-                    <div class="field">
 
-                        <label>
-                            Avatar
-                        </label>
+        <!-- existing profile sections -->
+
+        <section class="panel">
+
+            <div class="panel-title">
+
+                <h2>Account</h2>
+
+                <p>
+                    Your basic account information.
+                </p>
+
+            </div>
 
 
-                        <div class="avatar-edit">
+            <div class="form">
 
-                            <img src="https://i.pravatar.cc/100" class="avatar small">
 
-                            <button class="btn secondary">
-                                Change photo
-                            </button>
+                <div class="field">
 
-                        </div>
+                    <label>
+                        Avatar
+                    </label>
+
+
+                    <div class="avatar-edit">
+
+                        <img src="https://i.pravatar.cc/100" class="avatar small">
+
+                        <button class="btn secondary">
+                            Change photo
+                        </button>
 
                     </div>
-
-
-
-                    <div class="field">
-
-                        <label>
-                            Username
-                        </label>
-
-                        <input data-bind:username> <!--This element's value will get updated when signal gets updated (backend updates it), and signal will also get updated when this value gets updated (frontend updates it - user updates it manually)-->
-
-                    </div>
-
-
-
-                    <div class="field">
-
-                        <label>
-                            Display name
-                        </label>
-
-                        <input data-bind:display-name>
-
-                    </div>
-
-
-                    <div class="field">
-
-                        <label>
-                            Email
-                        </label>
-
-                        <input data-bind:email>
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-
-
-            <section class="panel">
-
-                <div class="panel-title">
-
-                    <h2>Personal</h2>
-
-                    <p>
-                        Used for localization and communication.
-                    </p>
 
                 </div>
 
 
-                <div class="form">
 
+                <div class="field">
 
-                    <div class="field">
+                    <label>
+                        Username
+                    </label>
 
-                        <label>
-                            Country
-                        </label>
-
-                        <input data-bind:country>
-
-                    </div>
-
-
-                    <div class="field">
-
-                        <label>
-                            City
-                        </label data-bind:city>
-
-                        <input>
-
-                    </div>
-
-
-                    <div class="field">
-
-                        <label>
-                            Timezone
-                        </label>
-
-                        <select>
-
-                            <option>
-                                Europe/Zagreb
-                            </option>
-
-                        </select>
-
-                    </div>
-
+                    <input data-bind:username>
+                    <!--This element's value will get updated when signal gets updated (backend updates it), and signal will also get updated when this value gets updated (frontend updates it - user updates it manually)-->
 
                 </div>
 
 
-            </section>
 
+                <div class="field">
 
+                    <label>
+                        Display name
+                    </label>
 
-            <section class="panel">
-
-
-                <div class="panel-title">
-
-                    <h2>About</h2>
-
-                    <p>
-                        Tell others something about yourself.
-                    </p>
+                    <input data-bind:display-name>
 
                 </div>
 
 
-                <div class="form">
+                <div class="field">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <input data-bind:email>
+
+                </div>
 
 
-                    <div class="field textarea-field">
+            </div>
 
-                        <label>
-                            Bio
-                        </label>
+        </section>
 
-                        <textarea>
+
+
+
+        <section class="panel">
+
+            <div class="panel-title">
+
+                <h2>Personal</h2>
+
+                <p>
+                    Used for localization and communication.
+                </p>
+
+            </div>
+
+
+            <div class="form">
+
+
+                <div class="field">
+
+                    <label>
+                        Country
+                    </label>
+
+                    <input data-bind:country>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        City
+                    </label data-bind:city>
+
+                    <input>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Timezone
+                    </label>
+
+                    <select>
+
+                        <option>
+                            Europe/Zagreb
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <section class="panel">
+
+
+            <div class="panel-title">
+
+                <h2>About</h2>
+
+                <p>
+                    Tell others something about yourself.
+                </p>
+
+            </div>
+
+
+            <div class="form">
+
+
+                <div class="field textarea-field">
+
+                    <label>
+                        Bio
+                    </label>
+
+                    <textarea>
 Backend developer and fitness enthusiast.
                     </textarea>
 
-                    </div>
-
-
                 </div>
 
 
-            </section>
+            </div>
+
+
+        </section>
 
 
 
-            <footer>
+        <footer>
 
-                <button class="btn secondary">
-                    Cancel
-                </button>
-
-
-                <button class="btn primary" data-on:click="@patch('/settings/profile')">
-                    Update profile
-                </button>
-
-            </footer>
+            <button class="btn secondary">
+                Cancel
+            </button>
 
 
+            <button class="btn primary" data-on:click="@patch('/settings/profile')">
+                Update profile
+            </button>
 
-        </main>
+        </footer>
 
 
-    </div>
 
-</body>
+    </main>
 
-</html>
+
+</div>
+
+{% endblock body_content %}

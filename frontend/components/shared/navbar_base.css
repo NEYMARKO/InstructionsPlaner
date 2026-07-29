@@ -430,15 +430,22 @@ nav a:hover {
     }
 }
 
-.logo {
+.logo a {
+    color: white;
+    text-decoration: none;
+
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+.logo a:hover {
+    color: white;
+}
+
 .logo i {
-    font-size: 22px;
     color: var(--accent);
+    font-size: 22px;
 }
 
 .notification-btn {

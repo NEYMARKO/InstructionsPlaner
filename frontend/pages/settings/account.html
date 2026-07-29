@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
-    <link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
-    <link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
+{% extends "components/shared/navbar_base.html" %}
 
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
-</head>
-<body>
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+<link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
+{% endblock stylesheet_import %}
 
-    {% include 'components/shared/navbar.html' %}
+{% block body_content %}
 
 <div class="settings-layout">
 
@@ -22,250 +16,248 @@
 
     <!-- Content -->
 
-<main class="settings-content">
+    <main class="settings-content">
 
-    <header class="content-header">
+        <header class="content-header">
 
-        <h1>Account</h1>
-
-        <p>
-            Manage your login information and account security.
-        </p>
-
-    </header>
-
-
-    <!-- Login -->
-
-    <section class="panel">
-
-        <div class="panel-title">
-
-            <h2>Login information</h2>
+            <h1>Account</h1>
 
             <p>
-                Information used to access your account.
+                Manage your login information and account security.
             </p>
 
-        </div>
+        </header>
 
 
-        <div class="settings-list">
+        <!-- Login -->
 
+        <section class="panel">
 
-            <div class="settings-row">
+            <div class="panel-title">
 
-                <div>
-                    <h3>Email address</h3>
-
-                    <p>
-                        jane@example.com
-                    </p>
-                </div>
-
-
-                <button class="btn secondary">
-                    Change
-                </button>
-
-            </div>
-
-
-
-            <div class="settings-row">
-
-                <div>
-
-                    <h3>Phone number</h3>
-
-                    <p>
-                        +385 91 123 4567
-                    </p>
-
-                </div>
-
-
-                <button class="btn secondary">
-                    Change
-                </button>
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- Security -->
-
-
-    <section class="panel">
-
-
-        <div class="panel-title">
-
-            <h2>Security</h2>
-
-            <p>
-                Protect your account.
-            </p>
-
-        </div>
-
-
-
-        <div class="settings-list">
-
-
-            <div class="settings-row">
-
-                <div>
-
-                    <h3>Password</h3>
-
-                    <p>
-                        Last changed 3 months ago.
-                    </p>
-
-                </div>
-
-
-                <button class="btn secondary">
-                    Change
-                </button>
-
-
-            </div>
-
-
-
-            <div class="settings-row">
-
-                <div>
-
-                    <h3>Two-factor authentication</h3>
-
-                    <p>
-                        Add an extra layer of security.
-                    </p>
-
-                </div>
-
-
-                <button class="btn primary">
-                    Enable
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-
-
-    <!-- Connected accounts -->
-
-
-    <section class="panel">
-
-
-        <div class="panel-title">
-
-            <h2>Connected accounts</h2>
-
-            <p>
-                Manage external login providers.
-            </p>
-
-        </div>
-
-
-
-        <div class="settings-list">
-
-
-            <div class="settings-row">
-
-                <div>
-
-                    <h3>Google</h3>
-
-                    <p>
-                        Connected
-                    </p>
-
-                </div>
-
-
-                <button class="btn secondary">
-                    Manage
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- Danger -->
-
-    <section class="panel danger-panel">
-
-
-        <div class="panel-title">
-
-            <h2>Danger zone</h2>
-
-            <p>
-                Permanent account actions.
-            </p>
-
-        </div>
-
-
-
-        <div class="settings-row">
-
-            <div>
-
-                <h3>Delete account</h3>
+                <h2>Login information</h2>
 
                 <p>
-                    Permanently remove your account and all data.
+                    Information used to access your account.
                 </p>
 
             </div>
 
 
-            <button class="btn danger">
-                Delete account
-            </button>
+            <div class="settings-list">
 
 
-        </div>
+                <div class="settings-row">
+
+                    <div>
+                        <h3>Email address</h3>
+
+                        <p>
+                            jane@example.com
+                        </p>
+                    </div>
 
 
-    </section>
+                    <button class="btn secondary">
+                        Change
+                    </button>
+
+                </div>
 
 
 
-</main>
+                <div class="settings-row">
 
+                    <div>
+
+                        <h3>Phone number</h3>
+
+                        <p>
+                            +385 91 123 4567
+                        </p>
+
+                    </div>
+
+
+                    <button class="btn secondary">
+                        Change
+                    </button>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- Security -->
+
+
+        <section class="panel">
+
+
+            <div class="panel-title">
+
+                <h2>Security</h2>
+
+                <p>
+                    Protect your account.
+                </p>
+
+            </div>
+
+
+
+            <div class="settings-list">
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Password</h3>
+
+                        <p>
+                            Last changed 3 months ago.
+                        </p>
+
+                    </div>
+
+
+                    <button class="btn secondary">
+                        Change
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Two-factor authentication</h3>
+
+                        <p>
+                            Add an extra layer of security.
+                        </p>
+
+                    </div>
+
+
+                    <button class="btn primary">
+                        Enable
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+
+        <!-- Connected accounts -->
+
+
+        <section class="panel">
+
+
+            <div class="panel-title">
+
+                <h2>Connected accounts</h2>
+
+                <p>
+                    Manage external login providers.
+                </p>
+
+            </div>
+
+
+
+            <div class="settings-list">
+
+
+                <div class="settings-row">
+
+                    <div>
+
+                        <h3>Google</h3>
+
+                        <p>
+                            Connected
+                        </p>
+
+                    </div>
+
+
+                    <button class="btn secondary">
+                        Manage
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- Danger -->
+
+        <section class="panel danger-panel">
+
+
+            <div class="panel-title">
+
+                <h2>Danger zone</h2>
+
+                <p>
+                    Permanent account actions.
+                </p>
+
+            </div>
+
+
+
+            <div class="settings-row">
+
+                <div>
+
+                    <h3>Delete account</h3>
+
+                    <p>
+                        Permanently remove your account and all data.
+                    </p>
+
+                </div>
+
+
+                <button class="btn danger">
+                    Delete account
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+
+    </main>
 
 </div>
 
-</body>
-</html>
+{% endblock body_content %}
