@@ -1,9 +1,9 @@
 from datastar_py import ServerSentEventGenerator as SSE
 from datastar_py.consts import ElementPatchMode
 from datastar_py.fastapi import DatastarResponse
+from datastar_py.sanic import datastar_response
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from datastar_py.sanic import datastar_response
 
 from ..shared import SESSION_USER_UUID_STR, templates
 from .authentication import is_authenticated
@@ -43,7 +43,7 @@ def get_home(request: Request):
     ]
     notif_count = 5
     return templates.TemplateResponse(
-        request=request, name="home/home.html", context={"instructions": instructions, "notifCnt": notif_count}
+        request=request, name="pages/home/home.html", context={"instructions": instructions, "notifCnt": notif_count}
     )
 
 @datastar_response
@@ -52,21 +52,49 @@ def get_notifications(request: Request):
     print("USER REQUESTED NOTIFICATIONS")
     notifications = [
         {
-            "message": "Don't forget to eat your vegetables" 
+            "title": "Training Reminder",
+            "message": "Your strength training session starts today at 4:00 PM.",
+            "created_at": "2 minutes ago",
+            "type": "unread"
         },
         {
-            "message": "Training starting at 4 o'clock"
+            "title": "New Instruction Assigned",
+            "message": "A new workout plan has been assigned to you. Check the details before starting.",
+            "created_at": "8 minutes ago",
+            "type": "unread"
         },
         {
-            "message": "I'm in love with a cocoa"
+            "title": "Goal Completed",
+            "message": "Congratulations! You completed your weekly training goal.",
+            "created_at": "25 minutes ago",
+            "type": "success"
         },
         {
-            "message": "Can't stop lifting"
+            "title": "Schedule Updated",
+            "message": "Your Monday training session has been moved to Wednesday at 6:30 PM.",
+            "created_at": "1 hour ago",
+            "type": "unread"
         },
         {
-            "message": "This is suppoused to be an extremly long message to test how will it fit into notifications side panel"
+            "title": "Missed Training",
+            "message": "You missed your planned workout yesterday. Would you like to reschedule it?",
+            "created_at": "3 hours ago",
+            "type": "danger"
+        },
+        {
+            "title": "Long Message Test",
+            "message": "This is an extremely long notification message designed to test how text wrapping behaves inside the notification side panel when there is a lot of content.",
+            "created_at": "Yesterday",
+            "type": "unread"
+        },
+        {
+            "title": "Training Streak",
+            "message": "Amazing work! You have maintained your training streak for 14 days.",
+            "created_at": "1 week ago",
+            "type": "success"
         }
     ]
-    html = templates.get_template("home/notifications/notifications.html").render({"notifications": notifications, "request": request})
+
+    html = templates.get_template("components/home/notifications/notifications.html").render({"notifications": notifications, "request": request})
     yield SSE.patch_elements(html, selector="#notification-panel", mode=ElementPatchMode.OUTER)
     yield SSE.patch_signals({"notifCount": len(notifications)})

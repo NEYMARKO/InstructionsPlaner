@@ -1,0 +1,144 @@
+{% extends "components/shared/navbar_base.html" %}
+
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/home/home.css') }}" rel="stylesheet">
+{% endblock stylesheet_import %}
+
+{% block body_content %}
+
+<div class="app-layout" data-class-notifications-open="$_showNotifs">
+
+    <div class="content">
+
+        <div class="container">
+
+            <main>
+
+                <section class="calendar">
+
+                    <div class="section-title">
+                        Weekly Schedule
+                    </div>
+
+
+                    <div class="week-grid">
+
+                        <div class="day">
+                            <h4>Mon</h4>
+
+                            <div class="event">
+                                Math
+                                <small>10:00 - 11:30</small>
+                            </div>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Tue</h4>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Wed</h4>
+
+                            <div class="event">
+                                Physics
+                                <small>15:00 - 16:30</small>
+                            </div>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Thu</h4>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Fri</h4>
+
+                            <div class="event">
+                                Programming
+                                <small>09:00 - 10:30</small>
+                            </div>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Sat</h4>
+                        </div>
+
+
+                        <div class="day">
+                            <h4>Sun</h4>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section>
+
+                    <div class="section-title">
+                        Upcoming Instructions
+                    </div>
+
+
+                    <div class="cards">
+
+                        {% for instr in instructions %}
+                        {% with training=instr %}
+                        {% include 'components/home/training/training.html' %}
+                        {% endwith %}
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+            </main>
+
+
+            <aside>
+
+                <section class="stats">
+
+                    <div class="section-title">
+                        Statistics
+                    </div>
+
+
+                    <div class="stat">
+                        <span>Attendances</span>
+                        <strong>28</strong>
+                    </div>
+
+
+                    <div class="stat">
+                        <span>Student Cancellations</span>
+                        <strong>2</strong>
+                    </div>
+
+
+                    <div class="stat">
+                        <span>Instructor Cancellations</span>
+                        <strong>1</strong>
+                    </div>
+
+
+                    <div class="stat">
+                        <span>Average Satisfaction</span>
+                        <strong>4.8 / 5</strong>
+                    </div>
+
+                </section>
+
+            </aside>
+
+        </div>
+
+    </div>
+    
+</div>
+
+{% endblock body_content %}

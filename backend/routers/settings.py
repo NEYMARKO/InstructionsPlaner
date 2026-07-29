@@ -27,7 +27,7 @@ async def get_profile(request: Request, service: Annotated[SettingsService, Depe
     print(f"{user=}")
     return templates.TemplateResponse(
         request=request, 
-        name="profile/profile.html", 
+        name="pages/settings/profile.html", 
         context={
             "username": user.username,
             "email": user.email,
@@ -39,20 +39,20 @@ async def get_profile(request: Request, service: Annotated[SettingsService, Depe
 
 @protected_router.get("/account")
 async def get_account(request: Request):
-    return templates.TemplateResponse(request=request, name="profile/account.html")
+    return templates.TemplateResponse(request=request, name="pages/settings/account.html")
 
 @protected_router.get("/appearance")
 async def get_appearance(request: Request):
-    return templates.TemplateResponse(request=request, name="profile/appearance.html")
+    return templates.TemplateResponse(request=request, name="pages/settings/appearance.html")
 
 @protected_router.get("/accessibility")
 async def get_accessibilityy(request: Request):
-    return templates.TemplateResponse(request=request, name="profile/accessibility.html")
+    return templates.TemplateResponse(request=request, name="pages/settings/accessibility.html")
 
 
 @protected_router.get("/notifications")
 async def get_notifications(request: Request):
-    return templates.TemplateResponse(request=request, name="profile/notifications.html")
+    return templates.TemplateResponse(request=request, name="pages/settings/notifications.html")
 
 @protected_router.patch("/profile")
 async def update_profile(request: Request, service: Annotated[SettingsService, Depends(get_service)]) -> DatastarResponse:

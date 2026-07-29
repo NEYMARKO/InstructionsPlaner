@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    <link href="{{ url_for('frontend', path='profile/profile.css') }}" rel="stylesheet">
-    <link href="{{ url_for('frontend', path='profile/account.css') }}" rel="stylesheet">
+    <link href="{{ url_for('frontend', path='pages/settings/profile.css') }}" rel="stylesheet">
+    <link href="{{ url_for('frontend', path='pages/settings/account.css') }}" rel="stylesheet">
 
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@latest/bundles/datastar.js"></script>
 </head>
@@ -18,38 +18,34 @@
 
         <!-- Navigation -->
 
-        {% include 'profile/side_navbar.html' %}
+        {% include 'components/settings/side_navbar.html' %}
 
         <!-- Content -->
 
         <main class="settings-content">
 
-
             <header class="content-header">
 
-                <h1>Accessibility</h1>
+                <h1>Appearance</h1>
 
                 <p>
-                    Adjust the experience to better suit your needs.
+                    Customize how the application looks and feels.
                 </p>
 
             </header>
 
 
-
             <section class="panel">
-
 
                 <div class="panel-title">
 
-                    <h2>Display</h2>
+                    <h2>Theme</h2>
 
                     <p>
-                        Improve readability and visibility.
+                        Choose your preferred color scheme.
                     </p>
 
                 </div>
-
 
 
                 <div class="settings-list">
@@ -58,27 +54,23 @@
                     <div class="settings-row">
 
                         <div>
-
-                            <h3>Text size</h3>
+                            <h3>Color theme</h3>
 
                             <p>
-                                Change the size of interface text.
+                                Select how the app appears.
                             </p>
-
                         </div>
 
 
                         <select class="small-control">
 
-                            <option>Default</option>
-                            <option>Large</option>
-                            <option>Extra large</option>
+                            <option>Dark</option>
+                            <option>Light</option>
+                            <option>System</option>
 
                         </select>
 
-
                     </div>
-
 
 
 
@@ -86,10 +78,10 @@
 
                         <div>
 
-                            <h3>High contrast</h3>
+                            <h3>Compact mode</h3>
 
                             <p>
-                                Increase contrast between elements.
+                                Show more information with less spacing.
                             </p>
 
                         </div>
@@ -103,9 +95,7 @@
 
                         </label>
 
-
                     </div>
-
 
 
                 </div>
@@ -117,13 +107,12 @@
 
             <section class="panel">
 
-
                 <div class="panel-title">
 
-                    <h2>Interaction</h2>
+                    <h2>Motion</h2>
 
                     <p>
-                        Change how you interact with the application.
+                        Control animations and transitions.
                     </p>
 
                 </div>
@@ -136,10 +125,10 @@
 
                         <div>
 
-                            <h3>Keyboard navigation</h3>
+                            <h3>Reduce animations</h3>
 
                             <p>
-                                Enable easier navigation without a mouse.
+                                Minimize movement effects.
                             </p>
 
                         </div>
@@ -159,12 +148,11 @@
 
                 </div>
 
-
             </section>
 
 
-
         </main>
+
 
     </div>
 

@@ -1,0 +1,175 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Segoe UI, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+
+/* PANELS */
+
+.calendar,
+.stats {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:25px;
+}
+
+.section-title {
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+
+/* CALENDAR */
+
+.week-grid {
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:12px;
+}
+
+.day {
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:15px;
+    min-height:180px;
+}
+
+.day h4 {
+    color:#c9d1d9;
+}
+
+.event {
+    margin-top:10px;
+    background:#1f6feb;
+    color:white;
+    border-radius:8px;
+    padding:10px;
+}
+
+.event small {
+    display:block;
+    color:#dbeafe;
+}
+
+
+/* TRAINING */
+
+.cards {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+.cards > *,
+.cards .card,
+.cards .training-card,
+.cards article,
+.cards section {
+    background:var(--surface)!important;
+    border:1px solid var(--border)!important;
+    color:var(--text)!important;
+    border-radius:12px;
+}
+
+.cards h1,
+.cards h2,
+.cards h3,
+.cards h4 {
+    color:white!important;
+}
+
+.cards p,
+.cards span,
+.cards small {
+    color:var(--muted)!important;
+}
+
+.cards button {
+    border-radius:8px;
+    padding:8px 14px;
+    font-weight:600;
+    background:#21262d;
+    border:1px solid var(--border);
+    color:white;
+}
+
+
+/* TRAINING STATUS */
+
+.cards .pending {
+    background:#92400e!important;
+    border-color:#b45309!important;
+    color:#fef3c7!important;
+}
+
+.cards .confirmed,
+.cards .success {
+    background:#065f46!important;
+    border-color:#047857!important;
+    color:#d1fae5!important;
+}
+
+.cards .cancelled,
+.cards .cancel {
+    background:#7f1d1d!important;
+    border-color:#991b1b!important;
+    color:#fee2e2!important;
+}
+
+
+.cards button.confirm,
+.cards button.confirm-attendance,
+.cards .confirm-btn {
+    background:#238636!important;
+    border-color:#2ea043!important;
+}
+
+.cards button.cancel,
+.cards button.cancel-btn {
+    background:#da3633!important;
+    border-color:#f85149!important;
+}
+
+
+/* STATISTICS */
+
+.stat {
+    display:flex;
+    justify-content:space-between;
+    padding:16px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.stat:last-child {
+    border:none;
+}
+
+.stat span {
+    color:var(--muted);
+}
+
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width:10px;
+}
+
+::-webkit-scrollbar-track {
+    background:var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background:var(--border);
+    border-radius:10px;
+}

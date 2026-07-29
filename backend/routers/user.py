@@ -48,7 +48,7 @@ def get_user_service(db: Annotated[Session, Depends(get_db)]) -> UserService:
 
 @router.get("/")
 async def get_user(request: Request, service: Annotated[UserService, Depends(get_user_service)]) -> DatastarResponse:
-    print("HERE")
+    print("IN USER ENDPOINT")
     user_info = service.get_user(request.cookies.get(SESSION_USER_UUID_STR, ""))
     if not user_info:
         return DatastarResponse()

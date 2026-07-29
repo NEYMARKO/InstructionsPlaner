@@ -69,7 +69,7 @@ protected_router = APIRouter(prefix="/auth", dependencies=[Depends(is_authentica
 @router.get("/login", response_class=HTMLResponse)
 def get_login(request: Request):
     return templates.TemplateResponse(
-        request=request, name="login/login.html"
+        request=request, name="pages/login/login.html"
     )
 
 @router.post("/login")
@@ -88,7 +88,7 @@ async def login(request: Request, credentials: UserCredentials, service: Annotat
 @router.get("/sign-up", response_class=HTMLResponse)
 def get_sign_up(request: Request):
     return templates.TemplateResponse(
-        request=request, name="registration/register.html"
+        request=request, name="pages/registration/register.html"
     )
 
 @router.post("/sign-up", response_model=None)
@@ -107,7 +107,7 @@ async def sign_user_up(request: Request, user: UserRequest, service: Annotated[A
 async def confirm_email(uuid: UUID, request: Request, service: Annotated[AuthService, Depends(get_service)]):
     service.confirm_mail(uuid)
     return templates.TemplateResponse(
-        request=request, name="registration/confirmation.html"
+        request=request, name="pages/registration/confirmation.html"
     )
 
 @protected_router.post("/logout")

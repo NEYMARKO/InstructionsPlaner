@@ -1,0 +1,55 @@
+<aside id="notification-panel" class="notification-panel" data-class:open="$_showNotifs">
+
+    <div class="notification-header">
+        Notifications
+    </div>
+
+    {% for notif in notifications %}
+
+    <div class="notification {{ notif.type }}">
+
+        <div class="notification-icon">
+            {% if notif.type == "success" %}
+            <i class="fa-solid fa-circle-check"></i>
+            {% elif notif.type == "danger" %}
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+            <i class="fa-solid fa-bell"></i>
+            {% endif %}
+        </div>
+
+        <div class="notification-body">
+
+            <div class="notification-title">
+                {{ notif.title }}
+            </div>
+
+            <p>{{ notif.message }}</p>
+
+            <small>{{ notif.created_at }}</small>
+
+
+            <div class="notification-actions">
+
+                <button class="confirm">
+                    <i class="fa-solid fa-check"></i>
+                    Confirm
+                </button>
+
+                <button class="delete">
+                    <i class="fa-solid fa-trash"></i>
+                    Delete
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    </div>
+
+
+    {% endfor %}
+
+</aside>
