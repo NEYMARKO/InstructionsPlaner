@@ -6,8 +6,10 @@ from pydantic.alias_generators import to_camel
 
 class UserBase(BaseModel):
     username: str
+    display_name: str
     email: str
-    # city: str
+    city: str | None
+    country: str | None
     is_student: bool = False
 
     model_config = ConfigDict(
@@ -18,11 +20,7 @@ class UserBase(BaseModel):
     )
 
 class UserUpdate(UserBase):
-    username: str
-    display_name: str
-    email: str
-    country: str
-    city: str
+    pass
 
 class UserResponse(UserBase):
     id: UUID

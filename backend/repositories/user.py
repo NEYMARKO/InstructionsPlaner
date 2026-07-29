@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import update
+from sqlalchemy.sql import insert, update
 
 from backend.dto.user import UserUpdate
 
@@ -17,11 +17,22 @@ class UserRepository():
 
     def save_user(self, new_user: UserRequest) -> UserResponse:
         # IN CASE OF WRITING SQL, write: SELECT * FROM public.user => NOTICE THAT SCHEMA NAME IS SPECIFIED ASWELL
-        new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
-        self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
+        query = insert(UserModel).values(
+            username=new_user.username,
+            display_name=new_user.display_name,
+            password=new_user.password,
+            email=new_user.email,
+            is_student=new_user.is_student,
+            country=new_user.country,
+            city=new_user.city
+        )
+        # new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
+        # self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
+        result = self.db.execute(query)
         self.db.commit()
-        self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
-        return UserResponse.model_validate(new_user_model)
+        # self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
+        # return UserResponse.model_validate(new_user_model)
+        return UserResponse.model_validate(result)
 
     def get_user(self, user_id: str) -> UserResponse | None:
         query = select(UserModel).where(UserModel.id==user_id)
@@ -39,8 +50,10 @@ class UserRepository():
             UserResponse(
                 id=row.id,
                 username=row.username,
+                display_name=row.display_name,
                 email=row.email,
-                # city=row.city,
+                city=row.city,
+                country=row.country,
                 is_student=row["is_student"]
             )
             for row in rows
@@ -67,10 +80,14 @@ class UserRepository():
         return UserResponse.model_validate(result)
 
     def update_profile(self, user_id: str, updated_info: UserUpdate) -> UserUpdate:
-        print(f"{updated_info=}")
-        print(f"HERE")
-        query = update(UserModel).where(UserModel.id==user_id).values(username=updated_info.username, email=updated_info.email)
-        result = self.db.execute(query)
-        print(f"{result=}")
+        query = update(UserModel).where(UserModel.id==user_id).values(
+            username=updated_info.username,
+            display_name=updated_info.display_name, 
+            email=updated_info.email,
+            country=updated_info.country,
+            city=updated_info.city
+            )
+        self.db.execute(query)
         self.db.commit()
+        result = self.db.get(UserModel, user_id)
         return UserUpdate.model_validate(result)

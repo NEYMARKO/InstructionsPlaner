@@ -30,7 +30,10 @@ async def get_profile(request: Request, service: Annotated[SettingsService, Depe
         name="profile/profile.html", 
         context={
             "username": user.username,
-            "email": user.email
+            "email": user.email,
+            "display_name": user.display_name,
+            "country": user.country,
+            "city": user.city
         }
     )
 
@@ -62,10 +65,8 @@ async def update_profile(request: Request, service: Annotated[SettingsService, D
     isn't collected in any way => signals need to be used because they are global)
     """
     print(f"PROFILE PATCH")
-    signals = await read_signals(request)
+    signals: dict[str, str] = await read_signals(request)
     print(f"{signals=}")
-    # user_id = extract_user_id_from_cookie(request)
-    # result = service.update_profile(user_id, user_info)
-    return DatastarResponse(
-        # SSE.patch_signals({"username": result.username, "email": result.email})
-    )
+    user_id = extract_user_id_from_cookie(request)
+    service.update_profile(user_id, signals)
+    return DatastarResponse()

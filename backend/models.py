@@ -1,10 +1,10 @@
-from datetime import datetime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, relationship, mapped_column
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer, String, Boolean, TIMESTAMP, DateTime, ForeignKey, func
-
 import uuid
+from datetime import datetime
+
+from sqlalchemy import TIMESTAMP, Boolean, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 Base = declarative_base()
 
@@ -19,15 +19,18 @@ class UserModel(Base):
     __tablename__ = "user"
     id: Mapped[UUID[str]] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    display_name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    # city: Mapped[str | None] = mapped_column(String, nullable=True)
+    city: Mapped[str | None] = mapped_column(String, nullable=True)
+    country: Mapped[str | None] = mapped_column(String, nullable=True)
     is_student: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     r_session: Mapped[list[UUID[str]]] = relationship(
         "SessionModel",
         back_populates="r_user",
-        cascade="all, delete"
+        cascade="all, delete",
+        passive_deletes=True # signals SQLAlchemy to not bother loading/deleting children itself, but letting DB handle it
     ) # if user gets deleted, delete all sessions that reference him
 
 class Group(Base):
@@ -53,7 +56,7 @@ class SessionModel(Base): # otherwise it is ambiguous when working with sqlalche
     session_uuid: Mapped[UUID[str]] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_uuid: Mapped[UUID[str]] = mapped_column(
         UUID, 
-        ForeignKey("user.id"),
+        ForeignKey("user.id", ondelete="CASCADE"),
         unique=False
     )
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)

@@ -17,9 +17,9 @@ from sqlalchemy.orm import Session
 
 from ..dto.authentication import (
     EmailConfirmationBase,
-    SignUpResponse,
     LoginResponse,
     SessionDTO,
+    SignUpResponse,
     UserCredentials,
 )
 from ..dto.user import UserRequest
@@ -135,6 +135,7 @@ class AuthService():
                 i += 1
         self.repository.delete_mail_verification_info(user.email) # this info needs to be deleted no matter the outcome (it will otherwise block any future mail sending to that address)
         if not confirmed:
+            print("NOT CONFIRMED IN TIME")
             raise RequestTimeoutException("Email wasn't confirmed in time")            
         return True
     
@@ -187,6 +188,7 @@ class AuthService():
             except asyncio.CancelledError:
                 print("CANCELLED MID WAIT")
         except RequestTimeoutException as e:
+            print("REQUEST TIMEOUT")
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
             return
         except (EmailConfirmationValidationException, UserCreationException):
@@ -207,6 +209,7 @@ class AuthService():
         password = self.repository.get_user_password(user_credentials.username)
         
         if user_credentials.password != password:
+            print("INVALID CREDENTIALS")
             ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
             return None
         
@@ -214,6 +217,7 @@ class AuthService():
         try:
             user_uuid, token = self.create_session(user_credentials.username)
         except UserNotFoundException:
+            print("USER NOT FOUND")
             ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
             return None
 

@@ -42,3 +42,6 @@ class UserService:
         # filtered = {k: v for k, v in changes.items() if v} # only pass attributes that have value => if some value is empty, it's attribute most likely isn't getting updated
         return self.repository.update_profile(user_id, updated_info)
         # return self.repository.update_profile(filtered)
+
+    def is_user_student(self, user_id: str) -> bool | None:
+        return getattr(self.get_user(user_id), "is_student", None) 

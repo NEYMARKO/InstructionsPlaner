@@ -13,9 +13,13 @@
 <body>
 
     <div class="settings-layout" data-signals="
-        {username: '{{ username }}' ? '{{ username }}' : '', 
-        realName: '{{ real_name }}' ? '{{ real_name }}' : '', 
-        email: '{{ email }}' ? '{{ email }}' : ''}"
+        {
+            username: '{{ username }}' ? '{{ username }}' : '', 
+            displayName: '{{ display_name }}' ? '{{ display_name }}' : '', 
+            email: '{{ email }}' ? '{{ email }}' : '',
+            country: '{{ country }}' ? '{{ country }}' : '',
+            city: '{{ city }}' ? '{{ city }}' : '',
+        }"
     >
 
 
@@ -103,7 +107,7 @@
                             Display name
                         </label>
 
-                        <input data-bind:realName value="$realName">
+                        <input data-bind:display-name>
 
                     </div>
 
@@ -114,7 +118,7 @@
                             Email
                         </label>
 
-                        <input data-bind:email value="$email">
+                        <input data-bind:email>
 
                     </div>
 
@@ -148,7 +152,7 @@
                             Country
                         </label>
 
-                        <input>
+                        <input data-bind:country>
 
                     </div>
 
@@ -157,7 +161,7 @@
 
                         <label>
                             City
-                        </label>
+                        </label data-bind:city>
 
                         <input>
 

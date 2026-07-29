@@ -1,19 +1,22 @@
-from uuid import UUID
-from sqlalchemy.orm import Session
 from typing import Annotated, Literal
-from fastapi import APIRouter, Depends
-from fastapi import Request
-from datastar_py.fastapi import DatastarResponse
+from uuid import UUID
+
 from datastar_py import ServerSentEventGenerator as SSE
+from datastar_py.fastapi import DatastarResponse
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
+from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..dto.user import UserRequest
 from ..dto.authentication import UserCredentials
-from ..shared import EVENT_SUBSCRIPTION_ID, SESSION_TOKEN_STR, SESSION_USER_UUID_STR, templates
-from ..services.authentication import (
-    AuthService, InternalServerException
-    )
+from ..dto.user import UserRequest
+from ..services.authentication import AuthService, InternalServerException
+from ..shared import (
+    EVENT_SUBSCRIPTION_ID,
+    SESSION_TOKEN_STR,
+    SESSION_USER_UUID_STR,
+    templates,
+)
 
 router = APIRouter(prefix="/auth")
 
@@ -91,6 +94,7 @@ def get_sign_up(request: Request):
 @router.post("/sign-up", response_model=None)
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse | None:
     event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
+    print(f"[USER SIGN-UP REQUEST]: {user}")
     service_response = await service.sign_up(event_subscription_id, user)
     if service_response:
         response = DatastarResponse(SSE.execute_script("window.location='/'"))
