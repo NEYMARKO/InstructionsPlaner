@@ -10,6 +10,7 @@ class UserBase(BaseModel):
     email: str
     city: str | None
     country: str | None
+    avatar_img_src: str | None
     is_student: bool = False
 
     model_config = ConfigDict(

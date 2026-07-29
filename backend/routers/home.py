@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from datastar_py import ServerSentEventGenerator as SSE
 from datastar_py.consts import ElementPatchMode
 from datastar_py.fastapi import DatastarResponse
@@ -5,6 +7,8 @@ from datastar_py.sanic import datastar_response
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
+from ..routers.user import get_user_service
+from ..services.user import UserService
 from ..shared import SESSION_USER_UUID_STR, templates
 from .authentication import is_authenticated
 
@@ -14,9 +18,11 @@ router = APIRouter(
 )
 
 @router.get("/", response_class=HTMLResponse)
-def get_home(request: Request):
+def get_home(request: Request, user_service: Annotated[UserService, Depends(get_user_service)]):
     user_id = request.cookies.get(SESSION_USER_UUID_STR, "")
     print(f"{user_id=}")
+
+    user_obj = user_service.get_user(user_id)
 
     instructions = [
         {
@@ -41,9 +47,10 @@ def get_home(request: Request):
             "time": "13:00 - 15:00"
         }
     ]
-    notif_count = 5
+    print(f"[HOME_PAGE]: {user_obj=}")
     return templates.TemplateResponse(
-        request=request, name="pages/home/home.html", context={"instructions": instructions, "notifCnt": notif_count}
+        request=request, name="pages/home/home.html", 
+        context={"instructions": instructions, "avatarImgSrc": getattr(user_obj, "avatar_img_src", "")}
     )
 
 @datastar_response

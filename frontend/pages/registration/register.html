@@ -12,7 +12,9 @@
 
 <body>
     {% include 'event_loader.html' %}
-    <div class="login-card" data-init="@get('/event-system')" data-signals="{username: '', email: '', password: '', isStudent:false}"
+    <div class="login-card" 
+        data-init="@get('/event-system')" 
+        data-signals="{avatar_img_src: 'https://ui-avatars.com/api/?name=John+Doe&size=80&background=random&bold=true', isStudent:false}"
         data-computed:is-student="!$_isTrainer">
 
         <h1>Sign Up</h1>

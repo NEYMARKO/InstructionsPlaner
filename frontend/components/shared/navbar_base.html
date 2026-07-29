@@ -14,7 +14,13 @@
 
 </head>
 
-<body data-signals="{_showNotifs:false, _showProfile:false, notifCount: 0}" data-class-notifications-open="$_showNotifs">
+<body data-init="@get('/notifications')" 
+    data-signals="
+    {
+        _showNotifs:false, _showProfile:false, 
+        notifCount: 0, avatarImgSrc: '{{ avatar_img_src }}' 
+    }" 
+    data-class-notifications-open="$_showNotifs">
     <header class="navbar">
 
         <div class="logo">
@@ -40,7 +46,7 @@
                 <i class="fa-regular fa-bell"></i>
 
                 <span class="badge"
-                    data-text="0"></span>
+                    data-text="$notifCount"></span>
             </button>
 
             <div class="profile-wrapper">
@@ -50,7 +56,7 @@
                         $_showProfile = !$_showProfile;
                         $_showProfile && @get('/user')">
 
-                    <img class="avatar" src="https://placehold.co/40" alt="Profile">
+                    <img class="avatar" data-attr:src="$avatarImgSrc" alt="Profile">
 
                 </button>
 
@@ -58,7 +64,7 @@
 
                     <div class="profile-header">
 
-                        <img class="profile-large-image" src="https://placehold.co/80" alt="Profile">
+                        <img class="profile-large-image" data-attr:src="$avatarImgSrc" alt="Profile">
 
                         <div>
                             <strong data-text="$name"></strong>

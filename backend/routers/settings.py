@@ -33,7 +33,8 @@ async def get_profile(request: Request, service: Annotated[SettingsService, Depe
             "email": user.email,
             "display_name": user.display_name,
             "country": user.country,
-            "city": user.city
+            "city": user.city,
+            "img_src": user.avatar_img_src
         }
     )
 

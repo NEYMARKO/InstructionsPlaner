@@ -24,7 +24,8 @@ class UserRepository():
             email=new_user.email,
             is_student=new_user.is_student,
             country=new_user.country,
-            city=new_user.city
+            city=new_user.city,
+            avatar_img_src=new_user.avatar_img_src
         )
         # new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
         # self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
@@ -54,6 +55,7 @@ class UserRepository():
                 email=row.email,
                 city=row.city,
                 country=row.country,
+                avatar_img_src=row.avatar_img_src,
                 is_student=row["is_student"]
             )
             for row in rows

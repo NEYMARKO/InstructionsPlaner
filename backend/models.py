@@ -24,6 +24,7 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     city: Mapped[str | None] = mapped_column(String, nullable=True)
     country: Mapped[str | None] = mapped_column(String, nullable=True)
+    avatar_img_src: Mapped[str | None] = mapped_column(String, nullable=True)
     is_student: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     r_session: Mapped[list[UUID[str]]] = relationship(
