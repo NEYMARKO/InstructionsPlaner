@@ -180,6 +180,8 @@ class AuthService():
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
         except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
             ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+            # print("IN THIS BLOCK")
+            # await self.wait_for_confirmation(user, wait_time=20)
             return
         try:
             try:

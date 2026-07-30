@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import re
+
 from sqlalchemy.orm import Session
 
 from backend.dto.user import UserUpdate
 
-from ..dto.user import UserRequest, UserResponse
+from ..dto.user import UserBase, UserRequest, UserResponse
 from ..repositories.user import UserRepository
 
+
+class NoRelevantInfoProvided(Exception):
+    pass
 
 class UserIdNotProvidedException(Exception):
     pass
@@ -43,5 +48,36 @@ class UserService:
         return self.repository.update_profile(user_id, updated_info)
         # return self.repository.update_profile(filtered)
 
-    def is_user_student(self, user_id: str) -> bool | None:
-        return getattr(self.get_user(user_id), "is_student", None) 
+    def is_user_student(self, user_obj: UserBase | None = None, user_id: str = "" ) -> bool | None:
+        if not user_obj and not user_id:
+            raise NoRelevantInfoProvided("Neither user object, nor user id have been provided")
+        return getattr(self.get_user(user_id), "is_student", None) if not user_obj else user_obj.is_student
+
+    def has_default_avatar(self, user_obj: UserBase | None = None, user_id: str = "") -> bool:
+        """
+        Checks whether user's avatar has been created by using following expression:
+
+        ```
+        'https://ui-avatars.com/api/?name=' + $displayName.split(' ').join('+') + '&background=' + Math.floor(Math.random() * 0x444444).toString(16).padStart(6, '0') + '&color=f0f6fc&size=80'
+        ```
+        
+        That is the expression that is used for generating avatar image when user first signs up.
+        """
+        if not user_obj and not user_id:
+            raise NoRelevantInfoProvided("Neither user object, nor user id have been provided")
+        
+        avatar_img_src = getattr(self.get_user(user_id), "avatar_img_src", None) if not user_obj else user_obj.avatar_img_src
+        if not avatar_img_src:
+            print(f"Can't locate avatar image for user: {avatar_img_src is not None}")
+            return False
+        pattern = re.compile(
+            r"^https://ui-avatars\.com/api/\?"
+            r"name=[^&]*"
+            r"&background=[0-9a-f]{6}"
+            r"&color=f0f6fc"
+            r"&size=80$"
+        )
+        if pattern.fullmatch(avatar_img_src):
+            print("User has default avatar")
+            return True
+        return False

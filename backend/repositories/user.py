@@ -87,7 +87,8 @@ class UserRepository():
             display_name=updated_info.display_name, 
             email=updated_info.email,
             country=updated_info.country,
-            city=updated_info.city
+            city=updated_info.city,
+            avatar_img_src=updated_info.avatar_img_src
             )
         self.db.execute(query)
         self.db.commit()

@@ -97,10 +97,12 @@ async def sign_user_up(request: Request, user: UserRequest, service: Annotated[A
     print(f"[USER SIGN-UP REQUEST]: {user}")
     service_response = await service.sign_up(event_subscription_id, user)
     if service_response:
+        print("SERVICE RESPONSE IS ALRIGHT")
         response = DatastarResponse(SSE.execute_script("window.location='/'"))
         response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
         response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_id)
         return response
+    print("SERVICE RESPONSE IS NOT TRUTHY")
     return
 
 @router.get("/confirm/{uuid}", response_class=HTMLResponse)
