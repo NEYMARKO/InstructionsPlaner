@@ -14,8 +14,9 @@
     {% include 'event_loader.html' %}
     <div class="login-card" 
         data-init="@get('/event-system')" 
-        data-signals="{avatar_img_src: 'https://ui-avatars.com/api/?name=John+Doe&size=80&background=random&bold=true', isStudent:false}"
-        data-computed:is-student="!$_isTrainer">
+        data-signals="{isStudent:false}"
+        data-computed:is-student="!$_isTrainer"
+        >
 
         <h1>Sign Up</h1>
 
@@ -37,7 +38,15 @@
                 <input type="checkbox" data-bind="_isTrainer">
                 <span>I am a trainer</span>
             </label>
-
+            
+            <input 
+            type="hidden"
+            data-computed:avatar-img-src="'https://ui-avatars.com/api/?name=' +
+                $displayName.split(' ').join('+') +
+                '&background=' +
+                Math.floor(Math.random() * 0x444444).toString(16).padStart(6, '0') +
+                '&color=f0f6fc&size=80'"
+            >
             <button>Create Account</button>
 
         </form>

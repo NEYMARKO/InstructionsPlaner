@@ -14,11 +14,11 @@
 
 </head>
 
-<body data-init="@get('/notifications')" 
+<body data-init="@get('/navbar')" 
     data-signals="
     {
-        _showNotifs:false, _showProfile:false, 
-        notifCount: 0, avatarImgSrc: '{{ avatar_img_src }}' 
+        _showNotifs:false, _showProfile:false,
+        notifCount: 0, avatarImgSrc: ''
     }" 
     data-class-notifications-open="$_showNotifs">
     <header class="navbar">
@@ -41,7 +41,7 @@
             <button class="notification-btn"
                 data-on:click="
                     $_showNotifs = !$_showNotifs;
-                    $_showNotifs && @get('/notifications')">
+                    $_showNotifs && @get('/navbar/notifications')">
 
                 <i class="fa-regular fa-bell"></i>
 
@@ -66,8 +66,8 @@
 
                         <img class="profile-large-image" data-attr:src="$avatarImgSrc" alt="Profile">
 
-                        <div>
-                            <strong data-text="$name"></strong>
+                        <div class="profile-info">
+                            <strong data-text="$username"></strong>
                             <small data-text="$email"></small>
                         </div>
 

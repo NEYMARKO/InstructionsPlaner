@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from datastar_py import ServerSentEventGenerator as SSE
 from datastar_py.fastapi import DatastarResponse
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
@@ -53,7 +52,7 @@ async def get_user(request: Request, service: Annotated[UserService, Depends(get
     if not user_info:
         return DatastarResponse()
     return DatastarResponse(
-        SSE.patch_signals({"name": user_info.username, "email": user_info.email})
+        # SSE.patch_signals({"name": user_info.username, "email": user_info.email})
     )
 
 # @protected_router.get("/profile")

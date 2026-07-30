@@ -50,7 +50,7 @@ def get_home(request: Request, user_service: Annotated[UserService, Depends(get_
     print(f"[HOME_PAGE]: {user_obj=}")
     return templates.TemplateResponse(
         request=request, name="pages/home/home.html", 
-        context={"instructions": instructions, "avatarImgSrc": getattr(user_obj, "avatar_img_src", "")}
+        context={"instructions": instructions, "avatar_img_src": getattr(user_obj, "avatar_img_src", "")}
     )
 
 @datastar_response

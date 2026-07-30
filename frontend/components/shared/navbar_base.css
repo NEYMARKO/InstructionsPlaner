@@ -231,6 +231,7 @@ nav a:hover {
 .avatar,
 .profile-large-image {
     border-radius:50%;
+    object-fit:cover;
 }
 
 .avatar {
@@ -242,12 +243,17 @@ nav a:hover {
     position:absolute;
     right:0;
     top:calc(100% + 12px);
-    width:280px;
+
+    width:300px;
+
     background:var(--surface);
     border:1px solid var(--border);
-    border-radius:12px;
-    padding:18px;
+    border-radius:14px;
+
+    padding:20px;
+
     box-shadow:0 16px 40px rgba(0,0,0,.5);
+
     display:none;
 }
 
@@ -255,42 +261,72 @@ nav a:hover {
     display:block;
 }
 
+
+/* PROFILE HEADER */
+
 .profile-header {
     display:flex;
     align-items:center;
-    gap:15px;
-    padding-bottom:15px;
+    gap:16px;
+
+    padding-bottom:18px;
     border-bottom:1px solid var(--border);
 }
 
+
+/* avatar */
+
 .profile-large-image {
-    width:70px;
-    height:70px;
+    width:72px;
+    height:72px;
+
+    flex-shrink:0;
+
+    border:2px solid var(--border);
+
+    box-shadow:
+        0 0 0 4px rgba(88,166,255,.08);
 }
 
-.profile-actions {
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    margin-top:15px;
+
+/* text area */
+
+.profile-header > div {
+    min-width:0;
+    flex:1;
 }
 
-.profile-actions a,
-.profile-actions button {
-    padding:10px 12px;
-    border-radius:8px;
-    background:none;
-    border:none;
-    color:#c9d1d9;
-    text-align:left;
-    cursor:pointer;
-    text-decoration:none;
+
+.profile-header strong {
+    display:block;
+
+    color:var(--text);
+
+    font-size:16px;
+    font-weight:700;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    margin-bottom:5px;
 }
 
-.profile-actions a:hover,
-.profile-actions button:hover {
-    background:var(--surface-hover);
+
+.profile-header small {
+    display:block;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    max-width:100%;
 }
+
 
 
 
@@ -365,6 +401,42 @@ nav a:hover {
     transition:.2s ease;
 }
 
+
+.profile-actions {
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+    margin-top:18px;
+}
+
+
+.profile-actions a,
+.profile-actions button {
+
+    padding:11px 13px;
+
+    border-radius:9px;
+
+    background:none;
+    border:none;
+
+    color:#c9d1d9;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    text-decoration:none;
+
+    transition:.2s ease;
+}
+
+.profile-actions a:hover,
+.profile-actions button:hover {
+    background:var(--surface-hover);
+}
 
 /* Confirm */
 
