@@ -5,6 +5,7 @@ import re
 from sqlalchemy.orm import Session
 
 from backend.dto.user import UserUpdate
+from backend.models import UserModel
 
 from ..dto.user import UserBase, UserRequest, UserResponse
 from ..repositories.user import UserRepository
@@ -28,7 +29,8 @@ class UserService:
         return self
     
     def add_user(self, user: UserRequest) -> UserResponse:
-        return self.repository.save_user(user)
+        user_model: UserModel = self.repository.save_user(user) 
+        return UserResponse.model_validate(user_model)
 
     def get_user(self, user_id: str) -> UserResponse | None:
         return self.repository.get_user(user_id)

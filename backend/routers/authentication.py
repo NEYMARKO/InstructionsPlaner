@@ -23,8 +23,9 @@ router = APIRouter(prefix="/auth")
 class NotAuthenticatedException(Exception):
     pass
 
-def get_service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
-    return AuthService(db)
+def get_service(request: Request, db: Annotated[Session, Depends(get_db)]) -> AuthService:
+    event_subs_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
+    return AuthService(event_subs_id, db)
 
 def is_authenticated(request: Request, service: Annotated[AuthService, Depends(get_service)]):
     """
@@ -51,7 +52,7 @@ def construct_cookie_response(
         http_only: bool = True, samesite: Literal['lax', 'strict', 'none'] | None = 'lax', max_age: int = 3600
     ) -> DatastarResponse:
 
-    print(f"Constructing cookie for key: {key}")
+    print(f"[CONSTRUCTING COOKIE] for key: {key}")
     if not response:
         response = DatastarResponse()
     response.set_cookie(
@@ -75,9 +76,8 @@ def get_login(request: Request):
 @router.post("/login")
 async def login(request: Request, credentials: UserCredentials, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse:
     service_response = None
-    event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
     print(f"[LOGIN] passed credentials: {credentials}")
-    service_response = service.login(event_subscription_id, credentials)
+    service_response = service.login(credentials)
     if not service_response:
         return DatastarResponse() # don't patch anything because that will overwrite original error msg
     response = DatastarResponse(SSE.execute_script("window.location='/'"))
@@ -93,9 +93,8 @@ def get_sign_up(request: Request):
 
 @router.post("/sign-up", response_model=None)
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse | None:
-    event_subscription_id = request.cookies.get(EVENT_SUBSCRIPTION_ID, "")
     print(f"[USER SIGN-UP REQUEST]: {user}")
-    service_response = await service.sign_up(event_subscription_id, user)
+    service_response = await service.sign_up(user)
     if service_response:
         print("SERVICE RESPONSE IS ALRIGHT")
         response = DatastarResponse(SSE.execute_script("window.location='/'"))

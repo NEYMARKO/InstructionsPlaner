@@ -66,13 +66,11 @@ def extract_user_id_from_cookie(request: Request) -> str:
 @datastar_response
 @protected_router.get("/", response_class=DatastarResponse, response_model=None)
 async def get_navbar(request: Request, user_service: Annotated[UserService, Depends(get_user_service)]):
-    print(f"[NABAR_ENDPOINT]")
     user_id = extract_user_id_from_cookie(request)
     user = user_service.get_user(user_id)
-    print(f"[NABAR_ENDPOINT - REQUESTED SOME INFO]")
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
-    print(f"{user=}")
+    print(f"[NAVBAR_ROUTER]: fetching user: {user=}")
 
     yield SSE.patch_signals(
         {

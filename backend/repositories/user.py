@@ -15,7 +15,7 @@ class UserRepository():
     def __init__(self,  db: Session):
         self.db = db
 
-    def save_user(self, new_user: UserRequest) -> UserResponse:
+    def save_user(self, new_user: UserRequest) -> UserModel:
         # IN CASE OF WRITING SQL, write: SELECT * FROM public.user => NOTICE THAT SCHEMA NAME IS SPECIFIED ASWELL
         query = insert(UserModel).values(
             username=new_user.username,
@@ -26,14 +26,10 @@ class UserRepository():
             country=new_user.country,
             city=new_user.city,
             avatar_img_src=new_user.avatar_img_src
-        )
-        # new_user_model = UserModel(username=new_user.username, password=new_user.password, email=new_user.email, is_student=new_user.is_student)
-        # self.db.add(new_user_model) # when adding a non-model-object into the session, UnmappedInstanceError will get thrown
-        result = self.db.execute(query)
+        ).returning(UserModel)
+        result = self.db.execute(query).scalar_one()
         self.db.commit()
-        # self.db.refresh(new_user_model) # when passing a non-model-object into the session functions, UnmappedInstanceError will get thrown
-        # return UserResponse.model_validate(new_user_model)
-        return UserResponse.model_validate(result)
+        return result
 
     def get_user(self, user_id: str) -> UserResponse | None:
         query = select(UserModel).where(UserModel.id==user_id)

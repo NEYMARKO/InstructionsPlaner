@@ -40,7 +40,12 @@ class AuthRepository():
         )
         self.db.execute(query)
         self.db.commit()
-    
+
+    def mail_verification_exists(self, email: str) -> bool:
+        query = select(EmailConfirmation).where(EmailConfirmation.email==email)
+        result = self.db.execute(query).scalar_one_or_none()
+        return result is not None
+
     def add_mail_verification_info(self, e_obj: EmailConfirmationBase) -> None:
         email_conf_model = EmailConfirmation(email=e_obj.email, sent_uuid=e_obj.sent_uuid, activated=e_obj.activated, requested_at=e_obj.requested_at)
         self.db.add(email_conf_model)
@@ -88,7 +93,6 @@ class AuthRepository():
                 (SessionModel.user_uuid==user_uuid) & (SessionModel.token==token)
         )
         result = self.db.scalars(query).one_or_none()
-        print(f"{result=}")
         return SessionDTO.model_validate(result) if result is not None else result
     
     def delete_stale_sessions(self) -> None:

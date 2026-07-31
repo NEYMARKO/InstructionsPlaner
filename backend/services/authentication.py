@@ -12,7 +12,6 @@ from typing import Literal
 
 import psycopg2
 from pydantic import ValidationError
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..dto.authentication import (
@@ -102,10 +101,14 @@ def send_confirmation_mail(email: str, confirmation_uuid: uuid.UUID) -> None:
     return
 
 class AuthService():
-    def __init__(self, db: Session) -> None:
+    def __init__(self, event_subs_id: str, db: Session) -> None:
         self.user_service = UserService(db)
         self.repository = AuthRepository(db)
-    
+        self.event_subs_id = event_subs_id
+
+    def queue_message(self, message: dict[str, str]) -> None:
+        ES.add_notification_to_queue(self.event_subs_id, message)
+        
     def email_confirmed(self, email: str, wait_time: int) -> bool:
         """
         Returns True in case `activated` attribute is set to `True` and not more than `wait_time` seconds have
@@ -145,16 +148,17 @@ class AuthService():
 
         if self.repository.get_user_by_email(user.email):
             raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
-        
-        try:
-            self.repository.add_mail_verification_info(EmailConfirmationBase(email=user.email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
-        except IntegrityError:
-            self.repository.rollback()
+
+        if self.repository.mail_verification_exists(user.email):
             raise RequestDuplicateException("Request has already been sent for this email address")
+
+        self.repository.add_mail_verification_info(EmailConfirmationBase(email=user.email, sent_uuid=confirmation_uuid, activated=False, requested_at=datetime.now()))
 
         print("[SENDING_MAIL...]")
         send_confirmation_mail(user.email, confirmation_uuid) # this is the bottleneck of the process - takes a long time to get sent
         print("[MAIL_SENT...]")
+        self.queue_message({"infoMsg": f"Mail has been sent to {user.email}, please check your inbox", "errorMsg": "", "successMsg": ""})
+
         return
 
     def confirm_mail(self, validation_uuid: uuid.UUID) -> str:
@@ -165,42 +169,44 @@ class AuthService():
     def save_user(self, user: UserRequest) -> bool:
         try:
             self.user_service.add_user(user)
-        except ValidationError:
-            raise UserCreationException("Problems with creating user")
+        except ValidationError as e:
+            print(f"[VALIDATION ERROR]: {e}")
+            raise UserCreationException(f"[USER_CREATION]: {e}")
         except psycopg2.errors.UniqueViolation:
             self.repository.rollback()
+            print("EMAIL ALREADY EXISTS")
             raise EmailAlreadyRegisteredException("Provided e-mail address has already been registered")
+        self.queue_message({"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"}) # if it got here, it means that user has been sucessfully saved
         return True
 
-    # async def sign_up(self, user: UserRequest) -> AsyncGenerator[tuple[EventType, str], None]:
-    async def sign_up(self, event_subscription_id: str, user: UserRequest) -> SignUpResponse | None:
-        user_saved = False
+    async def sign_up(self, user: UserRequest) -> SignUpResponse | None:
+        sign_up_response: SignUpResponse | None = None
         try:
             self.send_confirmation(user)
-            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": f"Mail has been sent to {user.email}, please confirm it.", "errorMsg": "", "successMsg": ""})
+            if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
+                self.save_user(user)                
+            user_id, token = self.create_session(user.username)
+            sign_up_response = SignUpResponse(token=token, user_id=user_id)
+
         except (RequestDuplicateException, EmailAlreadyRegisteredException) as e:
-            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
-            # print("IN THIS BLOCK")
-            # await self.wait_for_confirmation(user, wait_time=20)
-            return
-        try:
-            try:
-                if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
-                    user_saved = self.save_user(user)
-            except asyncio.CancelledError:
-                print("CANCELLED MID WAIT")
+            print(f"ERROR: {e}")
+            self.queue_message({"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+
+        except asyncio.CancelledError:
+            print("CANCELLED MID WAIT")
+
         except RequestTimeoutException as e:
             print("REQUEST TIMEOUT")
-            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
-            return
-        except (EmailConfirmationValidationException, UserCreationException):
-            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
-        if user_saved:
-            ES.add_notification_to_queue(event_subscription_id, {"infoMsg": "", "errorMsg": "", "successMsg": "Sucessfully signed up"})
-        user_id, token = self.create_session(user.username)
-        return SignUpResponse(token=token, user_id=user_id)
+            self.queue_message({"infoMsg": "", "errorMsg": str(e), "successMsg": ""})
+        
+        except (EmailConfirmationValidationException, UserCreationException) as e:
+            print(e)
+            self.queue_message({"infoMsg": "", "errorMsg": "Something went wrong, please try again.", "successMsg": ""})
 
-    def login(self, event_subscription_id: str, user_credentials: UserCredentials) -> LoginResponse | None:
+        finally:
+            return sign_up_response
+
+    def login(self, user_credentials: UserCredentials) -> LoginResponse | None:
         """
         Checks whether user with these particular credentials exists. In case user has logged with
         valid credentials, session is created and session id is passed through cookies in response.    
@@ -212,7 +218,7 @@ class AuthService():
         
         if user_credentials.password != password:
             print("INVALID CREDENTIALS")
-            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
+            self.queue_message({"error": "Invalid login credentials"})
             return None
         
         # Save session to db to compare it during every access to restriced endpoint
@@ -220,13 +226,13 @@ class AuthService():
             user_uuid, token = self.create_session(user_credentials.username)
         except UserNotFoundException:
             print("USER NOT FOUND")
-            ES.add_notification_to_queue(event_subscription_id, {"error": "Invalid login credentials"})
+            self.queue_message({"error": "Invalid login credentials"})
             return None
 
         if not user_uuid or not token:
-            ES.add_notification_to_queue(event_subscription_id, {"error": "Something went wrong, please try again."})
+            self.queue_message({"error": "Something went wrong, please try again."})
             return None
-        ES.add_notification_to_queue(event_subscription_id, {"error": ""}) # delete error msg in case user has successfully logged in
+        self.queue_message({"error": ""}) # delete error msg in case user has successfully logged in
         return LoginResponse(message="Successfully logged in", user_uuid_str=user_uuid, token=token)
 
     def token_expired(self, valid_until: datetime | None) -> bool:

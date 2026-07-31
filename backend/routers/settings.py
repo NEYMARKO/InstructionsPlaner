@@ -24,7 +24,7 @@ async def get_profile(request: Request, service: Annotated[SettingsService, Depe
     user = service.get_user(user_id)
     if not user:
         return 
-    print(f"{user=}")
+    print(f"[PROFILE]: fetching user: {user=}")
     return templates.TemplateResponse(
         request=request, 
         name="pages/settings/profile.html", 
