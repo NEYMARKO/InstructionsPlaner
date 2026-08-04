@@ -172,7 +172,6 @@ class AuthService():
 
     def save_user(self, user: UserRequest) -> bool:
         try:
-            print(f"adding user: {user}")
             self.user_service.add_user(user)
         except ValidationError as e:
             print(f"[VALIDATION ERROR]: {e}")
@@ -189,7 +188,6 @@ class AuthService():
         try:
             self.send_confirmation(user)
             if await asyncio.create_task(self.wait_for_confirmation(user, wait_time=20)):
-                print(f"should save user: {user}")
                 self.save_user(user)                
             user_id, token = self.create_session(user.username)
             sign_up_response = SignUpResponse(token=token, user_id=user_id)
