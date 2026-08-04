@@ -94,14 +94,7 @@ def get_sign_up(request: Request):
 @router.post("/sign-up", response_model=None)
 async def sign_user_up(request: Request, user: UserRequest, service: Annotated[AuthService, Depends(get_service)]) -> DatastarResponse | None:
     print(f"[USER SIGN-UP REQUEST]: {user}")
-    service_response = await service.sign_up(user)
-    if service_response:
-        print("SERVICE RESPONSE IS ALRIGHT")
-        response = DatastarResponse(SSE.execute_script("window.location='/'"))
-        response = construct_cookie_response(response, SESSION_TOKEN_STR, service_response.token)
-        response = construct_cookie_response(response, SESSION_USER_UUID_STR, service_response.user_id)
-        return response
-    print("SERVICE RESPONSE IS NOT TRUTHY")
+    await service.sign_up(user)
     return
 
 @router.get("/confirm/{uuid}", response_class=HTMLResponse)

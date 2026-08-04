@@ -10,7 +10,7 @@ from backend.routers.authentication import NotAuthenticatedException
 from backend.routers.authentication import protected_router as protected_auth_router
 from backend.routers.authentication import router as auth_router
 from backend.routers.counter import router as counter_router
-from backend.routers.event_system import router as event_system_router
+from backend.routers.event_listener import router as event_listener_router
 from backend.routers.home import router as home_router
 from backend.routers.navbar import protected_router as navbar_router
 from backend.routers.settings import protected_router as settings_router
@@ -20,8 +20,8 @@ from backend.routers.user import (  # has to be relative to the root - root is w
 )
 
 from .db import engine
+from .event_system import event_system as ES
 from .models import Base
-from .notifications import event_system as ES
 
 
 @asynccontextmanager
@@ -56,7 +56,7 @@ app.include_router(user_router)
 app.include_router(protected_user_router)
 app.include_router(auth_router)
 app.include_router(protected_auth_router)
-app.include_router(event_system_router)
+app.include_router(event_listener_router)
 app.include_router(settings_router)
 app.include_router(navbar_router)
 
