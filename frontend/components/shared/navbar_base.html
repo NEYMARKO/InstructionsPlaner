@@ -18,7 +18,7 @@
     data-signals="
     {
         _showNotifs:false, _showProfile:false,
-        notifCount: 0, avatarImgSrc: ''
+        notifCount: 0, avatarImgSrc: '', isTrainer: false
     }" 
     data-class-notifications-open="$_showNotifs">
     <header class="navbar">
@@ -32,10 +32,12 @@
 
         <nav>
             <a href="/">Home</a>
-            <a href="/settings/profile">Profile</a>
             <a href="/instructions/history">Past Instructions</a>
             <a href="/statistics">Statistics</a>
-            <a href="/training/create">Create training</a>
+            <div data-show="$isTrainer">
+                <a href="/training/create">Create training</a>
+            </div>
+            <a href="/settings/profile">Profile</a>
         </nav>
 
         <div class="nav-actions">

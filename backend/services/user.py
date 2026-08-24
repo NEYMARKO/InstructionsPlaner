@@ -11,6 +11,9 @@ from ..dto.user import UserBase, UserRequest, UserResponse
 from ..repositories.user import UserRepository
 
 
+class EmptyIDProvidedException(Exception):
+    pass
+
 class NoRelevantInfoProvided(Exception):
     pass
 
@@ -33,6 +36,8 @@ class UserService:
         return UserResponse.model_validate(user_model)
 
     def get_user(self, user_id: str) -> UserResponse | None:
+        if not user_id:
+            raise EmptyIDProvidedException("User ID has not been provided")
         return self.repository.get_user(user_id)
     
     def get_users(self) -> list[UserResponse]:

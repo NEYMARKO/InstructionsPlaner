@@ -743,9 +743,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 
-/* =========================================================
-   ACTIONS
-   ========================================================= */
+ /* =========================================================
+    ACTIONS
+    ========================================================= */
 
 .form-actions {
     grid-column: 1 / -1;
@@ -762,24 +762,80 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: 8px;
     font: 600 13px var(--font);
     cursor: pointer;
-    transition: .2s ease;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        box-shadow .2s ease;
 }
 
+
+/* Cancel */
+
 .btn-secondary {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
+    background: rgba(248, 81, 73, .08);
+    border: 1px solid rgba(248, 81, 73, .45);
+    color: var(--danger);
 }
 
 .btn-secondary:hover {
-    background: var(--surface-hover);
+    background: rgba(248, 81, 73, .15);
+    border-color: var(--danger);
+    color: #ff7b72;
 }
+
+.btn-secondary:focus-visible {
+    outline: none;
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(248, 81, 73, .12);
+}
+
+
+
+/* Save as Template */
+
+.btn-template {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: #c9d1d9;
+}
+
+.btn-template:hover {
+    background: rgba(88, 166, 255, .08);
+    border-color: #3d8bfd;
+    color: var(--accent);
+}
+
+.btn-template:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, .12);
+}
+
+.btn-template i {
+    color: #8b949e;
+    font-size: 13px;
+    transition: color .2s ease;
+}
+
+.btn-template:hover i {
+    color: var(--accent);
+}
+
+
+/* Create Training */
 
 .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+
     background: var(--success);
     border: 1px solid #2ea043;
     color: #fff;
@@ -787,7 +843,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .btn-primary:hover {
     background: #2ea043;
+    border-color: #3fb950;
 }
+
+.btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(35, 134, 54, .25);
+}
+
 
 
 /* =========================================================

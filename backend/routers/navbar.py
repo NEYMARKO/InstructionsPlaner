@@ -77,7 +77,8 @@ async def get_navbar(request: Request, user_service: Annotated[UserService, Depe
             "username": user.username,
             "avatarImgSrc": user.avatar_img_src,
             "notifCount": len(notifications),
-            "email": user.email
+            "email": user.email,
+            "isTrainer": not user.is_student
         }
     )
 
