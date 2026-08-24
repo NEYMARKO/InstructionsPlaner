@@ -14,6 +14,7 @@ from backend.routers.event_listener import router as event_listener_router
 from backend.routers.home import router as home_router
 from backend.routers.navbar import protected_router as navbar_router
 from backend.routers.settings import protected_router as settings_router
+from backend.routers.training import router as training_router
 from backend.routers.user import protected_router as protected_user_router
 from backend.routers.user import (  # has to be relative to the root - root is workspace folder (where you ar positioned in terminal)
     router as user_router,
@@ -59,6 +60,7 @@ app.include_router(protected_auth_router)
 app.include_router(event_listener_router)
 app.include_router(settings_router)
 app.include_router(navbar_router)
+app.include_router(training_router)
 
 app.include_router(counter_router)
 

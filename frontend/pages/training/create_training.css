@@ -1,0 +1,1102 @@
+/* =========================================================
+   CREATE TRAINING PERIOD
+   Simplified
+   ========================================================= */
+
+:root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-hover: #21262d;
+    --border: #30363d;
+    --text: #f0f6fc;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --success: #238636;
+    --danger: #f85149;
+    --input-bg: #0d1117;
+    --font: Inter, Segoe UI, system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+.app-layout,
+.content {
+    background: var(--bg);
+    color: var(--text);
+}
+
+body {
+    margin: 0;
+    font-family: var(--font);
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.training-form-page {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 30px 40px 60px;
+    color: var(--text);
+    font-family: var(--font);
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.training-form-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.training-form-header > div {
+    min-width: 0;
+}
+
+.training-form-header h1 {
+    margin: 0 0 7px;
+    color: var(--text);
+    font-size: 27px;
+    line-height: 1.25;
+    font-weight: 700;
+}
+
+.training-form-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.back-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.back-btn:hover {
+    background: var(--surface-hover);
+    border-color: #484f58;
+}
+
+
+/* =========================================================
+   MAIN GRID
+   ========================================================= */
+
+.training-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 22px;
+    align-items: start;
+}
+
+.form-section {
+    grid-column: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    color: var(--text);
+    overflow: visible;
+}
+
+
+/* =========================================================
+   SECTION TITLES
+   ========================================================= */
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.section-title i {
+    width: 17px;
+    color: var(--accent);
+    text-align: center;
+}
+
+
+/* =========================================================
+   SOURCE OPTIONS
+   ========================================================= */
+
+.source-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.source-option {
+    position: relative;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.source-option:hover {
+    background: var(--surface-hover);
+}
+
+.source-option.active {
+    background: rgba(88, 166, 255, .08);
+    border-color: var(--accent);
+}
+
+.source-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.source-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(88, 166, 255, .13);
+    border-radius: 8px;
+    color: var(--accent);
+}
+
+.source-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.source-content strong,
+.source-content span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.source-content strong {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.source-content span {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.selected-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--accent);
+    font-size: 11px;
+    opacity: 0;
+}
+
+.source-option.active .selected-icon {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   TEMPLATE SELECTOR
+   ========================================================= */
+
+.template-selector {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.template-selector.hidden {
+    display: none !important;
+}
+
+.template-selector label,
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.template-selector small,
+.field-hint {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label span {
+    color: var(--danger);
+}
+
+
+/* =========================================================
+   FORM CONTROLS
+   ========================================================= */
+
+.training-form input,
+.training-form select,
+.form-group textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+.training-form input,
+.training-form select {
+    height: 42px;
+    padding: 0 12px;
+}
+
+.form-group textarea {
+    display: block;
+    min-height: 105px;
+    padding: 12px 13px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.training-form input::placeholder,
+.form-group textarea::placeholder {
+    color: #6e7681;
+}
+
+.training-form input:focus,
+.training-form select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, .10);
+}
+
+.training-form select {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   DATE / TIME
+   ========================================================= */
+
+.input-icon,
+.date-picker {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-icon input {
+    padding-left: 36px;
+}
+
+input[type="date"],
+input[type="time"] {
+    min-width: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+
+/* =========================================================
+   CUSTOM DATE PICKER
+   ========================================================= */
+
+.date-picker-input {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    background: #11151c;
+    border: 1px solid #2b323d;
+    border-radius: 6px;
+    color: #f1f3f5;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.date-picker-input:hover {
+    background: #151a22;
+    border-color: #3b4654;
+}
+
+.date-picker-input:focus {
+    outline: none;
+    border-color: #7f9bb8;
+    box-shadow: 0 0 0 3px rgba(127, 155, 184, .12);
+}
+
+.date-picker-input i {
+    color: #aeb9c5;
+    font-size: 15px;
+}
+
+.date-picker-input:hover i,
+.date-picker-input[aria-expanded="true"] i {
+    color: #dce5ee;
+}
+
+#dateDisplay.placeholder {
+    color: #687382;
+}
+
+
+/* =========================================================
+   CALENDAR
+   ========================================================= */
+
+.calendar-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 310px;
+    padding: 14px;
+    background: #11151c;
+    border: 1px solid #2b323d;
+    border-radius: 10px;
+    box-shadow:
+        0 14px 35px rgba(0, 0, 0, .45),
+        0 4px 12px rgba(0, 0, 0, .25);
+    z-index: 1000;
+    animation: calendarOpen .12s ease-out;
+}
+
+@keyframes calendarOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: 34px 1fr 34px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.calendar-month {
+    color: #f1f3f5;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.calendar-nav {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #8793a1;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.calendar-nav:hover {
+    background: #202731;
+    color: #f1f3f5;
+}
+
+.calendar-nav i {
+    font-size: 11px;
+}
+
+.calendar-weekdays,
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays {
+    margin-bottom: 5px;
+}
+
+.calendar-weekdays span {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #697584;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.calendar-days {
+    gap: 3px;
+}
+
+.calendar-day {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #cbd2da;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .12s ease;
+}
+
+.calendar-day:hover {
+    background: #202731;
+    color: #fff;
+}
+
+.calendar-day.other-month {
+    color: #424b57;
+}
+
+.calendar-day.other-month:hover {
+    color: #7b8795;
+}
+
+.calendar-day.today {
+    position: relative;
+    color: #9db8d2;
+    font-weight: 600;
+}
+
+.calendar-day.today::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #8ea9c2;
+}
+
+.calendar-day.selected {
+    background: #718da8;
+    color: #fff;
+    font-weight: 600;
+}
+
+.calendar-day.selected:hover {
+    background: #819db8;
+}
+
+.calendar-day.selected.today::after {
+    background: #fff;
+}
+
+
+/* =========================================================
+   DURATION
+   ========================================================= */
+
+.duration-input {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(100px, 120px);
+    gap: 8px;
+}
+
+
+/* =========================================================
+   TRAINEE GROUP
+   ========================================================= */
+
+.selected-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.group-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(35, 134, 54, .15);
+    border-radius: 8px;
+    color: #3fb950;
+}
+
+.group-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.group-info strong,
+.group-info span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.group-info strong {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.group-info span {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.remove-group {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.remove-group:hover {
+    background: rgba(248, 81, 73, .1);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.form-summary {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    position: sticky;
+    top: 90px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    overflow: hidden;
+}
+
+.summary-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.summary-header i {
+    color: var(--accent);
+}
+
+.summary-row {
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-row:last-child {
+    border-bottom: 0;
+}
+
+.summary-row span,
+.summary-row strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.summary-row span {
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.summary-row strong {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#summaryDetails {
+    white-space: pre-line;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding-top: 2px;
+}
+
+.form-actions button {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font: 600 13px var(--font);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background: var(--surface-hover);
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--success);
+    border: 1px solid #2ea043;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #2ea043;
+}
+
+
+/* =========================================================
+   CALENDAR FOOTER
+   ========================================================= */
+
+.calendar-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #252c35;
+}
+
+#todayBtn {
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #8fa8bf;
+    font: 500 12px var(--font);
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+#todayBtn:hover {
+    background: #202731;
+    color: #c8d6e3;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+    .training-form-page {
+        padding-inline: 25px;
+    }
+
+    .training-form {
+        grid-template-columns: minmax(0, 1fr) 270px;
+        gap: 18px;
+    }
+
+    .form-summary {
+        padding: 17px;
+    }
+}
+
+@media (max-width: 900px) {
+    .training-form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section,
+    .form-summary,
+    .form-actions {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .form-summary {
+        position: static;
+    }
+}
+
+@media (max-width: 650px) {
+    .training-form-page {
+        padding: 20px 15px 40px;
+    }
+
+    .training-form-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .back-btn {
+        align-self: flex-start;
+    }
+
+    .form-grid,
+    .source-options {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: 1;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-popup {
+        width: 100%;
+        max-width: 310px;
+    }
+}
+
+@media (max-width: 420px) {
+    .training-form-page {
+        padding: 15px 10px 30px;
+    }
+
+    .form-section {
+        padding: 17px;
+    }
+
+    .duration-input {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   TIME PICKER
+   ========================================================= */
+
+.time-picker {
+    position: relative;
+    width: 100%;
+}
+
+.time-picker-input {
+    width: 100%;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 14px;
+
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+.time-picker-input:hover {
+    background: var(--surface-hover);
+    border-color: #484f58;
+}
+
+.time-picker-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, .10);
+}
+
+.time-picker-input i {
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   TIME POPUP
+   ========================================================= */
+
+.time-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+
+    width: 390px;
+    max-width: calc(100vw - 30px);
+
+    padding: 16px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    box-shadow:
+        0 14px 35px rgba(0, 0, 0, .45),
+        0 4px 12px rgba(0, 0, 0, .25);
+
+    z-index: 1000;
+}
+
+.time-popup-header {
+    margin-bottom: 14px;
+
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   TIME COLUMNS
+   ========================================================= */
+
+.time-columns {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+}
+
+.time-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.time-column-label {
+    display: block;
+    margin-bottom: 8px;
+
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.time-separator {
+    padding-top: 32px;
+
+    color: var(--muted);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   TIME OPTIONS
+   ========================================================= */
+
+.time-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 5px;
+
+    height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-right: 4px;
+}
+
+/* scrollbar */
+.time-options::-webkit-scrollbar {
+    width: 7px;
+}
+
+.time-options::-webkit-scrollbar-track {
+    background: #0d1117;
+    border-radius: 4px;
+}
+
+.time-options::-webkit-scrollbar-thumb {
+    background: #484f58;
+    border-radius: 4px;
+}
+
+.time-options::-webkit-scrollbar-thumb:hover {
+    background: #6e7681;
+}
+
+
+/* =========================================================
+   TIME OPTION
+   ========================================================= */
+
+.time-option {
+    min-height: 38px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background: #21262d;
+    color: var(--text);
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 13px;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease;
+}
+
+.time-option:hover {
+    background: #30363d;
+    border-color: #484f58;
+}
+
+.time-option.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+

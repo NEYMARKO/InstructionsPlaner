@@ -1,0 +1,1055 @@
+{% extends "components/shared/navbar_base.html" %}
+
+{% block stylesheet_import %}
+<link href="{{ url_for('frontend', path='pages/training/create_training.css') }}" rel="stylesheet">
+{% endblock stylesheet_import %}
+
+{% block body_content %}
+
+<div class="training-form-page">
+
+    <div class="training-form-header">
+        <div>
+            <h1>Create Training Period</h1>
+            <p>Create a new training period from scratch or start from an existing template.</p>
+        </div>
+
+        <a href="#" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back
+        </a>
+    </div>
+
+
+    <form class="training-form">
+
+        <!-- CREATION METHOD -->
+
+        <section class="form-section">
+            <div class="section-title">
+                <i class="fa-solid fa-layer-group"></i>
+                Training setup
+            </div>
+
+            <div class="source-options">
+
+                <label class="source-option active">
+                    <input type="radio" name="source" value="scratch" checked>
+
+                    <div class="source-icon">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+
+                    <div class="source-content">
+                        <strong>Create from scratch</strong>
+                        <span>Define the training period manually.</span>
+                    </div>
+
+                    <i class="fa-solid fa-circle-check selected-icon"></i>
+                </label>
+
+
+                <label class="source-option">
+                    <input type="radio" name="source" value="template">
+
+                    <div class="source-icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+
+                    <div class="source-content">
+                        <strong>Use training template</strong>
+                        <span>Start with settings from an existing template.</span>
+                    </div>
+
+                    <i class="fa-solid fa-circle-check selected-icon"></i>
+                </label>
+
+            </div>
+
+
+            <div class="template-selector hidden" id="templateSelector">
+
+                <label for="template">
+                    Training template
+                </label>
+
+                <select id="template" name="template">
+                    <option value="">Select a training template</option>
+                    <option value="basic">Basic Training — 2 hours</option>
+                    <option value="advanced">Advanced Training — 4 hours</option>
+                    <option value="safety">Safety Training — 1 hour</option>
+                </select>
+
+                <small>
+                    Selecting a template will pre-fill the duration, location and start time.
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!-- TRAINING DETAILS -->
+
+        <section class="form-section">
+
+            <div class="section-title">
+                <i class="fa-solid fa-dumbbell"></i>
+                Training details
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-group full">
+                    <label for="trainingName">
+                        Training name
+                        <span>*</span>
+                    </label>
+
+                    <input type="text" id="trainingName" name="trainingName" placeholder="e.g. First Aid Training"
+                        required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="dateDisplay">
+                        Date
+                        <span>*</span>
+                    </label>
+
+                    <div class="date-picker" id="datePicker">
+
+                        <!-- Actual value submitted to Flask -->
+                        <input type="hidden" id="date" name="date" required>
+
+                        <!-- Visible input -->
+                        <button type="button" class="date-picker-input" id="datePickerBtn" aria-haspopup="dialog"
+                            aria-expanded="false">
+
+                            <span id="dateDisplay">DD/MM/YYYY</span>
+
+                            <i class="fa-regular fa-calendar"></i>
+                        </button>
+
+
+                        <!-- Custom calendar -->
+                        <div class="calendar-popup" id="calendarPopup" hidden>
+
+                            <div class="calendar-header">
+
+                                <button type="button" class="calendar-nav" id="prevMonth" aria-label="Previous month">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+
+                                <div class="calendar-month" id="calendarMonth"></div>
+
+                                <button type="button" class="calendar-nav" id="nextMonth" aria-label="Next month">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="calendar-weekdays">
+                                <span>Mo</span>
+                                <span>Tu</span>
+                                <span>We</span>
+                                <span>Th</span>
+                                <span>Fr</span>
+                                <span>Sa</span>
+                                <span>Su</span>
+                            </div>
+
+
+                            <div class="calendar-days" id="calendarDays"></div>
+
+
+                            <div class="calendar-footer">
+                                <button type="button" id="todayBtn">
+                                    Today
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="startTime">
+                        Start time
+                        <span>*</span>
+                    </label>
+
+                    <div class="time-picker" id="startTimePicker">
+
+                        <input type="hidden" id="startTime" name="startTime" required>
+
+                        <button type="button" class="time-picker-input" id="startTimePickerBtn" aria-haspopup="dialog"
+                            aria-expanded="false">
+
+                            <span id="startTimeDisplay">HH:MM</span>
+
+                            <i class="fa-regular fa-clock"></i>
+                        </button>
+
+                        <div class="time-popup" id="startTimePopup" hidden>
+
+                            <div class="time-popup-header">
+                                <span>Select start time</span>
+                            </div>
+
+                            <div class="time-columns">
+
+                                <div class="time-column">
+                                    <span class="time-column-label">Hour</span>
+                                    <div class="time-options" id="startHourOptions"></div>
+                                </div>
+
+                                <div class="time-separator">:</div>
+
+                                <div class="time-column">
+                                    <span class="time-column-label">Minute</span>
+                                    <div class="time-options" id="startMinuteOptions"></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="form-group">
+                    <label for="endTime">
+                        End time
+                        <span>*</span>
+                    </label>
+
+                    <div class="time-picker" id="endTimePicker">
+
+                        <input type="hidden" id="endTime" name="endTime" required>
+
+                        <button type="button" class="time-picker-input" id="endTimePickerBtn" aria-haspopup="dialog"
+                            aria-expanded="false">
+
+                            <span id="endTimeDisplay">HH:MM</span>
+
+                            <i class="fa-regular fa-clock"></i>
+                        </button>
+
+                        <div class="time-popup" id="endTimePopup" hidden>
+
+                            <div class="time-popup-header">
+                                Select end time
+                            </div>
+
+                            <div class="time-columns">
+
+                                <div class="time-column">
+                                    <span class="time-column-label">Hour</span>
+                                    <div class="time-options" id="endHourOptions"></div>
+                                </div>
+
+                                <div class="time-separator">:</div>
+
+                                <div class="time-column">
+                                    <span class="time-column-label">Minute</span>
+                                    <div class="time-options" id="endMinuteOptions"></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <div class="form-group">
+                    <label for="location">
+                        Location
+                        <span>*</span>
+                    </label>
+
+                    <div class="input-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        <input type="text" id="location" name="location" placeholder="e.g. Training Room A" required>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label for="details">
+                        Details / instructions
+                    </label>
+
+                    <textarea id="details" name="details" rows="4" maxlength="1000"
+                        placeholder="Add useful instructions for trainees, e.g. Ring the doorbell, go to the 3rd floor, enter through the side entrance..."></textarea>
+
+                    <div class="field-hint">
+                        Optional information trainees should know before arriving.
+                    </div>
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- TRAINEES -->
+
+        <section class="form-section">
+
+            <div class="section-title">
+                <i class="fa-solid fa-users"></i>
+                Assign trainees
+            </div>
+
+            <div class="form-group">
+
+                <label for="traineeGroup">
+                    Trainee group
+                    <span>*</span>
+                </label>
+
+                <select id="traineeGroup" name="traineeGroup" required>
+                    <option value="">Select a trainee group</option>
+                    <option value="group-a">
+                        Group A — 12 trainees
+                    </option>
+                    <option value="group-b">
+                        Group B — 18 trainees
+                    </option>
+                    <option value="group-c">
+                        Group C — 9 trainees
+                    </option>
+                </select>
+
+            </div>
+
+
+            <div class="selected-group">
+
+                <div class="group-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <div class="group-info">
+                    <strong>Group A</strong>
+                    <span>12 trainees assigned</span>
+                </div>
+
+                <button type="button" class="remove-group">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- SUMMARY -->
+
+        <aside class="form-summary">
+
+            <div class="summary-header">
+                <i class="fa-solid fa-circle-info"></i>
+                Training summary
+            </div>
+
+            <div class="summary-row">
+                <span>Training</span>
+                <strong id="summaryName">Not specified</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Date</span>
+                <strong id="summaryDate">Not specified</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Start time</span>
+                <strong id="summaryTime">Not specified</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Duration</span>
+                <strong id="summaryDuration">2 hours</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Location</span>
+                <strong id="summaryLocation">Not specified</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Trainees</span>
+                <strong>12 trainees</strong>
+            </div>
+
+        </aside>
+
+
+        <!-- ACTIONS -->
+
+        <div class="form-actions">
+
+            <button type="button" class="btn-secondary">
+                Cancel
+            </button>
+
+            <button type="submit" class="btn-primary">
+                <i class="fa-solid fa-check"></i>
+                Create Training Period
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const datePicker = document.getElementById("datePicker");
+        const dateInput = document.getElementById("date");
+        const dateDisplay = document.getElementById("dateDisplay");
+        const datePickerBtn = document.getElementById("datePickerBtn");
+
+        const calendarPopup = document.getElementById("calendarPopup");
+        const calendarDays = document.getElementById("calendarDays");
+        const calendarMonth = document.getElementById("calendarMonth");
+
+        const prevMonthBtn = document.getElementById("prevMonth");
+        const nextMonthBtn = document.getElementById("nextMonth");
+        const todayBtn = document.getElementById("todayBtn");
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const today = new Date();
+
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+
+        let selectedDate = null;
+
+
+        /* =====================================================
+           HELPERS
+           ===================================================== */
+
+        function pad(number) {
+            return String(number).padStart(2, "0");
+        }
+
+
+        function formatDateForInput(date) {
+            return (
+                date.getFullYear() +
+                "-" +
+                pad(date.getMonth() + 1) +
+                "-" +
+                pad(date.getDate())
+            );
+        }
+
+
+        function formatDateForDisplay(date) {
+            return (
+                pad(date.getDate()) +
+                "/" +
+                pad(date.getMonth() + 1) +
+                "/" +
+                date.getFullYear()
+            );
+        }
+
+
+
+        function isSameDate(date1, date2) {
+
+            return (
+                date1 &&
+                date2 &&
+                date1.getFullYear() === date2.getFullYear() &&
+                date1.getMonth() === date2.getMonth() &&
+                date1.getDate() === date2.getDate()
+            );
+
+        }
+
+
+        /* =====================================================
+           OPEN / CLOSE
+           ===================================================== */
+
+        function openCalendar() {
+
+            calendarPopup.hidden = false;
+
+            datePickerBtn.setAttribute("aria-expanded", "true");
+
+            renderCalendar();
+
+        }
+
+
+        function closeCalendar() {
+
+            calendarPopup.hidden = true;
+
+            datePickerBtn.setAttribute("aria-expanded", "false");
+
+        }
+
+
+        datePickerBtn.addEventListener("click", function () {
+
+            if (calendarPopup.hidden) {
+                openCalendar();
+            } else {
+                closeCalendar();
+            }
+
+        });
+
+
+        /* =====================================================
+           RENDER CALENDAR
+           ===================================================== */
+
+        function renderCalendar() {
+
+            calendarDays.innerHTML = "";
+
+
+            const monthDate = new Date(
+                currentYear,
+                currentMonth,
+                1
+            );
+
+
+            const monthName = monthDate.toLocaleDateString(
+                "en-US",
+                {
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+
+            calendarMonth.textContent = monthName;
+
+
+            /*
+             * JavaScript:
+             * Sunday = 0
+             * Monday = 1
+             *
+             * We want Monday as the first day.
+             */
+
+            let firstDay = monthDate.getDay();
+
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+
+            const daysInCurrentMonth = new Date(
+                currentYear,
+                currentMonth + 1,
+                0
+            ).getDate();
+
+
+            const daysInPreviousMonth = new Date(
+                currentYear,
+                currentMonth,
+                0
+            ).getDate();
+
+
+            /* -------------------------------------------------
+               Previous month's trailing days
+               ------------------------------------------------- */
+
+            for (let i = firstDay - 1; i >= 0; i--) {
+
+                const day = daysInPreviousMonth - i;
+
+                const date = new Date(
+                    currentYear,
+                    currentMonth - 1,
+                    day
+                );
+
+                createDayButton(date, true);
+
+            }
+
+
+            /* -------------------------------------------------
+               Current month's days
+               ------------------------------------------------- */
+
+            for (
+                let day = 1;
+                day <= daysInCurrentMonth;
+                day++
+            ) {
+
+                const date = new Date(
+                    currentYear,
+                    currentMonth,
+                    day
+                );
+
+                createDayButton(date, false);
+
+            }
+
+
+            /* -------------------------------------------------
+               Next month's leading days
+               ------------------------------------------------- */
+
+            const totalCells = calendarDays.children.length;
+
+            const remainingCells =
+                totalCells <= 35
+                    ? 35 - totalCells
+                    : 42 - totalCells;
+
+
+            for (
+                let day = 1;
+                day <= remainingCells;
+                day++
+            ) {
+
+                const date = new Date(
+                    currentYear,
+                    currentMonth + 1,
+                    day
+                );
+
+                createDayButton(date, true);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CREATE DAY
+           ===================================================== */
+
+        function createDayButton(date, otherMonth) {
+
+            const button = document.createElement("button");
+
+            button.type = "button";
+
+            button.className = "calendar-day";
+
+            button.textContent = date.getDate();
+
+
+            if (otherMonth) {
+                button.classList.add("other-month");
+            }
+
+
+            if (isSameDate(date, today)) {
+                button.classList.add("today");
+            }
+
+
+            if (isSameDate(date, selectedDate)) {
+                button.classList.add("selected");
+            }
+
+
+            button.addEventListener("click", function () {
+
+                selectDate(date);
+
+            });
+
+
+            calendarDays.appendChild(button);
+
+        }
+
+
+        /* =====================================================
+           SELECT DATE
+           ===================================================== */
+
+        function selectDate(date) {
+
+            selectedDate = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+            );
+
+
+            /*
+             * This is the value Flask receives.
+             *
+             * Example:
+             * 2026-08-24
+             */
+
+            dateInput.value = formatDateForInput(selectedDate);
+
+
+            /*
+             * This is what the user sees.
+             *
+             * Example:
+             * Mon, Aug 24, 2026
+             */
+
+            dateDisplay.textContent =
+                formatDateForDisplay(selectedDate);
+
+            dateDisplay.classList.remove("placeholder");
+
+
+            /*
+             * If user clicked a date from the
+             * previous/next month, move the calendar
+             * to that month.
+             */
+
+            currentMonth = selectedDate.getMonth();
+            currentYear = selectedDate.getFullYear();
+
+
+            renderCalendar();
+
+            closeCalendar();
+
+        }
+
+
+        /* =====================================================
+           PREVIOUS MONTH
+           ===================================================== */
+
+        prevMonthBtn.addEventListener("click", function () {
+
+            currentMonth--;
+
+            if (currentMonth < 0) {
+
+                currentMonth = 11;
+                currentYear--;
+
+            }
+
+            renderCalendar();
+
+        });
+
+
+        /* =====================================================
+           NEXT MONTH
+           ===================================================== */
+
+        nextMonthBtn.addEventListener("click", function () {
+
+            currentMonth++;
+
+            if (currentMonth > 11) {
+
+                currentMonth = 0;
+                currentYear++;
+
+            }
+
+            renderCalendar();
+
+        });
+
+
+        /* =====================================================
+           TODAY BUTTON
+           ===================================================== */
+
+        todayBtn.addEventListener("click", function () {
+
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+
+            selectDate(today);
+
+        });
+
+
+        /* =====================================================
+           CLOSE WHEN CLICKING OUTSIDE
+           ===================================================== */
+
+        document.addEventListener("click", function (event) {
+
+            if (
+                !datePicker.contains(event.target) &&
+                !calendarPopup.hidden
+            ) {
+
+                closeCalendar();
+
+            }
+
+        });
+
+
+        /* =====================================================
+           ESCAPE KEY
+           ===================================================== */
+
+        document.addEventListener("keydown", function (event) {
+
+            if (
+                event.key === "Escape" &&
+                !calendarPopup.hidden
+            ) {
+
+                closeCalendar();
+
+                datePickerBtn.focus();
+
+            }
+
+        });
+
+
+        /* =====================================================
+           INITIAL STATE
+           ===================================================== */
+
+        dateDisplay.textContent = "DD/MM/YYYY";
+        dateDisplay.classList.add("placeholder");
+
+    });
+
+
+    function setupTimePicker({
+        pickerId,
+        buttonId,
+        popupId,
+        inputId,
+        displayId,
+        hourOptionsId,
+        minuteOptionsId,
+        summaryId
+    }) {
+        const button = document.getElementById(buttonId);
+        const popup = document.getElementById(popupId);
+
+        const input = document.getElementById(inputId);
+        const display = document.getElementById(displayId);
+
+        const hourOptions = document.getElementById(hourOptionsId);
+        const minuteOptions = document.getElementById(minuteOptionsId);
+
+        let selectedHour = null;
+        let selectedMinute = null;
+
+
+        // Create hours
+        for (let hour = 0; hour < 24; hour++) {
+
+            const option = document.createElement("button");
+
+            option.type = "button";
+            option.className = "time-option";
+            option.textContent = String(hour).padStart(2, "0");
+
+            option.dataset.value = hour;
+
+            hourOptions.appendChild(option);
+        }
+
+
+        // Create minutes
+        // Change 5 to 1 here if you want every minute available.
+        for (let minute = 0; minute < 60; minute += 5) {
+
+            const option = document.createElement("button");
+
+            option.type = "button";
+            option.className = "time-option";
+            option.textContent = String(minute).padStart(2, "0");
+
+            option.dataset.value = minute;
+
+            minuteOptions.appendChild(option);
+        }
+
+
+        // Open picker
+        button.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            const currentlyOpen = !popup.hidden;
+
+            // Close all other time pickers
+            document.querySelectorAll(".time-popup").forEach(p => {
+                p.hidden = true;
+            });
+
+            document.querySelectorAll(".time-picker-input").forEach(b => {
+                b.setAttribute("aria-expanded", "false");
+            });
+
+
+            // Toggle this one
+            popup.hidden = currentlyOpen;
+
+            button.setAttribute(
+                "aria-expanded",
+                String(!currentlyOpen)
+            );
+        });
+
+
+        // Don't close when clicking inside popup
+        popup.addEventListener("click", (event) => {
+            event.stopPropagation();
+        });
+
+
+        // Select hour
+        hourOptions.addEventListener("click", (event) => {
+
+            const option = event.target.closest(".time-option");
+
+            if (!option) {
+                return;
+            }
+
+            selectedHour = Number(option.dataset.value);
+
+            hourOptions
+                .querySelectorAll(".time-option")
+                .forEach(item => item.classList.remove("selected"));
+
+            option.classList.add("selected");
+
+            updateTime();
+        });
+
+
+        // Select minute
+        minuteOptions.addEventListener("click", (event) => {
+
+            const option = event.target.closest(".time-option");
+
+            if (!option) {
+                return;
+            }
+
+            selectedMinute = Number(option.dataset.value);
+
+            minuteOptions
+                .querySelectorAll(".time-option")
+                .forEach(item => item.classList.remove("selected"));
+
+            option.classList.add("selected");
+
+            updateTime();
+        });
+
+
+        function updateTime() {
+
+            if (selectedHour === null || selectedMinute === null) {
+                return;
+            }
+
+            const hour = String(selectedHour).padStart(2, "0");
+            const minute = String(selectedMinute).padStart(2, "0");
+
+            const time = `${hour}:${minute}`;
+
+            input.value = time;
+            display.textContent = time;
+
+
+            // Update summary if one exists
+            if (summaryId) {
+
+                const summary = document.getElementById(summaryId);
+
+                if (summary) {
+                    summary.textContent = time;
+                }
+            }
+
+
+            // Close after selecting complete time
+            popup.hidden = true;
+
+            button.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+        }
+    }
+
+
+    // Start time picker
+    setupTimePicker({
+        pickerId: "startTimePicker",
+        buttonId: "startTimePickerBtn",
+        popupId: "startTimePopup",
+        inputId: "startTime",
+        displayId: "startTimeDisplay",
+        hourOptionsId: "startHourOptions",
+        minuteOptionsId: "startMinuteOptions",
+        summaryId: "summaryTime"
+    });
+
+
+    // End time picker
+    setupTimePicker({
+        pickerId: "endTimePicker",
+        buttonId: "endTimePickerBtn",
+        popupId: "endTimePopup",
+        inputId: "endTime",
+        displayId: "endTimeDisplay",
+        hourOptionsId: "endHourOptions",
+        minuteOptionsId: "endMinuteOptions",
+        summaryId: "summaryEndTime"
+    });
+
+
+    // Close picker when clicking elsewhere
+    document.addEventListener("click", () => {
+
+        document.querySelectorAll(".time-popup").forEach(popup => {
+            popup.hidden = true;
+        });
+
+        document.querySelectorAll(".time-picker-input").forEach(button => {
+            button.setAttribute("aria-expanded", "false");
+        });
+    });
+
+</script>
+
+
+{% endblock %}
